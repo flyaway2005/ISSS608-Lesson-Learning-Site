@@ -2,4 +2,8 @@
 title: "ISSS608-Lesson Learning Site"
 ---
 
-Welcome to **ISSS608 Visual Analytics and Applications**.![](images/464740354_9537139022969180_859824700808627719_n.jpg)
+Welcome to **ISSS608 Visual Analytics and Applications**.
+
+In this website, you will find my learning journey in ISSS608 Visual Analytics and Applications.
+
+![](images/clipboard-3438092479.jpeg)
