@@ -9,7 +9,7 @@ execute:
   freeze: true
 ---
 
-###Getting Started
+### Getting Started
 
 Loading tidyverse onto r environment by using the code chunk below.
 
@@ -17,7 +17,7 @@ Loading tidyverse onto r environment by using the code chunk below.
 pacman::p_load(tidyverse)
 ```
 
-###Importing data
+### Importing data
 ```{r}
 #| :False
 realis2019 <- read_csv("data/REALIS2019.csv")
@@ -25,7 +25,7 @@ realis2019 <- read_csv("data/REALIS2019.csv")
 ```{r}
 popdata_fat <- read_csv("data/PopData2019_fat.csv")
 ```
-###Pivoting data
+### Pivoting data
 ```{r}
 popdata_long <- popdata_fat %>%
   pivot_longer(c(3:21),
@@ -45,9 +45,9 @@ popdata_long <- read_rds("data/popdata_long.rds")
 ```{r}
 #| eval: False
 realis2019_filtered <- realis2019 %>%
-select(`Project Name`, `Type of Sale`, `Transacted Price($)`, `Property Type`, `UnitPrice($ psm)`) %>%
+select(`Project Name`, `Type of Sale`, `Transacted Price ($)`, `Property Type`, `Unit Price ($ psm)`) %>%
   filter(`Property Type` == "Condominium"| 
-           `Prpoerty Type` == "Apartment") %>%
+           `Property Type` == "Apartment") %>%
   filter(`Type of Sale` == "New Sale") %>%
   filter(`Unit Price ($ psm)` <= 11000)
 ```
