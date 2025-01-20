@@ -3,12 +3,12 @@ title: "Hands-on Exercise 1"
 author: "Chang Fang Yu"
 date-modified: "last-modified"
 execute:
-  echo: false
+  echo: True
 ---
+#  A Layered Grammar of Graphics: ggplot2 methods
+## Getting Started
 
-# Getting Started
-
-## Install and launching R packages
+### Install and launching R packages
 
 The code chunk below use p_load() of Pacman package to check if tidyverse packages are installed in the computer. If they are, then they will be launched into R.
 
@@ -16,13 +16,13 @@ The code chunk below use p_load() of Pacman package to check if tidyverse packag
 pacman::p_load(tidyverse)
 ```
 
-## Importing the data
+### Importing the data
 
 ```{r}
 exam_data <- read_csv("Data/Exam_data.csv")
 ```
 
-# Plotting a simple bar chart
+### Plotting a simple bar chart
 
 ```{r}
 ggplot(data = exam_data,
@@ -30,11 +30,16 @@ ggplot(data = exam_data,
   geom_bar()
 ```
 
+
+## R Graphics VS ggplot
+
+::: {.panel-tabset}
+### R Graphics
 ```{r}
-#| code-fold: true
-#| code-summary: "Show the code"
+hist(exam_data$MATHS)
 ```
 
+### ggplot2
 ```{r}
 ggplot(data=exam_data, aes(x = MATHS)) +
   geom_histogram(bins=10, 
@@ -42,24 +47,28 @@ ggplot(data=exam_data, aes(x = MATHS)) +
                  color="black", 
                  fill="grey") +
   ggtitle("Distribution of Maths scores")
-
 ```
-
+:::
+###  Essential Grammatical Elements in ggplot2: data
 ```{R}
 ggplot(data=exam_data)
 
 ```
+### Essential Grammatical Elements in ggplot2: Aesthetic mappings
 ```{R}
 ggplot(data=exam_data, 
        aes(x= MATHS))
 
 ```
+##  Essential Grammatical Elements in ggplot2: geom
+### Geometric Objects: geom_bar
 ```{R}
 ggplot(data=exam_data, 
        aes(x=RACE)) +
   geom_bar()
 
 ```
+### Geometric Objects: geom_dotplot
 ```{R}
 ggplot(data=exam_data, 
        aes(x = MATHS)) +
@@ -74,11 +83,13 @@ ggplot(data=exam_data,
                      breaks = NULL)  
 
 ```
+### Geometric Objects: geom_histogram()
 ```{R}
 ggplot(data=exam_data, 
        aes(x = MATHS)) +
   geom_histogram()   
 ```
+### Modifying a geometric object by changing geom()
 ```{R}
 ggplot(data=exam_data, 
        aes(x= MATHS)) +
@@ -87,6 +98,7 @@ ggplot(data=exam_data,
                  fill="light blue")  
 
 ```
+###  Modifying a geometric object by changing aes()
 ```{R}
 ggplot(data=exam_data, 
        aes(x= MATHS, 
@@ -95,6 +107,7 @@ ggplot(data=exam_data,
                  color="grey30")
 
 ```
+### Geometric Objects: geom-density()
 ```{R}
 ggplot(data=exam_data, 
        aes(x = MATHS)) +
@@ -108,6 +121,7 @@ ggplot(data=exam_data,
            colour = GENDER)) +
   geom_density()
 ```
+### Geometric Objects: geom_boxplot
 ```{R}
 ggplot(data=exam_data, 
        aes(y = MATHS,       
@@ -122,6 +136,7 @@ ggplot(data=exam_data,
   geom_boxplot(notch=TRUE)
 
 ```
+### Geometric Objects: geom_violin
 ```{R}
 ggplot(data=exam_data, 
        aes(y = MATHS, 
@@ -129,14 +144,18 @@ ggplot(data=exam_data,
   geom_violin()
 
 ```
+### Geometric Objects: geom_point()
 ```{R}
+#| echo: true
 ggplot(data=exam_data, 
        aes(x= MATHS, 
            y=ENGLISH)) +
   geom_point()   
 
 ```
+### geom objects can be combined
 ```{R}
+#| echo: true
 ggplot(data=exam_data, 
        aes(y = MATHS, 
            x= GENDER)) +
@@ -145,12 +164,15 @@ ggplot(data=exam_data,
              size = 0.5)  
 
 ```
+##  Essential Grammatical Elements in ggplot2: stat
+### Working with stat()
 ```{R}
 ggplot(data=exam_data, 
        aes(y = MATHS, x= GENDER)) +
   geom_boxplot()
 
 ```
+### Working with stat - the stat_summary() method
 ```{R}
 ggplot(data=exam_data, 
        aes(y = MATHS, x= GENDER)) +
@@ -160,6 +182,7 @@ ggplot(data=exam_data,
                colour ="red",        
                size=4)    
 ```
+### Working with stat - the geom() method
 ```{R}
 ggplot(data=exam_data, 
        aes(y = MATHS, x= GENDER)) +
@@ -169,6 +192,7 @@ ggplot(data=exam_data,
              colour="red",          
              size=4)  
 ```
+###  Adding a best fit curve on a scatterplot?
 ```{R}
 ggplot(data=exam_data, 
        aes(x= MATHS, y=ENGLISH)) +
@@ -184,6 +208,8 @@ ggplot(data=exam_data,
   geom_smooth(method=lm, 
               linewidth=0.5)
 ```
+## Essential Grammatical Elements in ggplot2: Facets
+### Working with facet_wrap()
 ```{R}
 ggplot(data=exam_data, 
        aes(x= MATHS)) +
@@ -191,12 +217,15 @@ ggplot(data=exam_data,
     facet_wrap(~ CLASS)
 
 ```
+### facet_grid() function
 ```{R}
 ggplot(data=exam_data, 
        aes(x= MATHS)) +
   geom_histogram(bins=20) +
     facet_grid(~ CLASS)
 ```
+##  Essential Grammatical Elements in ggplot2: Coordinates
+### Working with Coordinate
 ```{R}
 ggplot(data=exam_data, 
        aes(x=RACE)) +
@@ -209,6 +238,7 @@ ggplot(data=exam_data,
   coord_flip()
 
 ```
+###  Changing the y- and x-axis range
 ```{R}
 ggplot(data=exam_data, 
        aes(x= MATHS, y=ENGLISH)) +
@@ -224,6 +254,8 @@ ggplot(data=exam_data,
   coord_cartesian(xlim=c(0,100),
                   ylim=c(0,100))
 ```
+## Essential Grammatical Elements in ggplot2: themes
+### Working with theme
 ```{R}
 ggplot(data=exam_data, 
        aes(x=RACE)) +
