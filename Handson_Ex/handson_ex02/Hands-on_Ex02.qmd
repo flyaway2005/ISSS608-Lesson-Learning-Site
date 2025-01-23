@@ -4,10 +4,10 @@ author: "Chang Fang Yu"
 date-modified: "last-modified"
 execute:
   echo: True
- 
 ---
 
 ## Getting Started
+
 ### Installing and loading the required libraies
 
 ```{R}
@@ -16,16 +16,22 @@ pacman::p_load(ggrepel, patchwork,
                tidyverse) 
 
 ```
+
 ### Importing data
+
 ```{R}
 #| message: false
 #| warning: false
 exam_data <- read_csv("data/Exam_data.csv")
 ```
+
 ## Beyond ggplot2 Annotation: ggrepel
+
 ### Working with ggrepel
-::: {.panel-tabset}
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -42,7 +48,9 @@ ggplot(data=exam_data,
                   ylim=c(0,100)) +
   ggtitle("English scores versus Maths scores for Primary 3")
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -63,8 +71,10 @@ ggplot(data=exam_data,
 :::
 
 ## Beyond ggplot2 Themes
-::: {.panel-tabset}
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -78,7 +88,9 @@ ggplot(data=exam_data,
   theme_bw() +
   ggtitle("Distribution of Maths scores") 
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -96,8 +108,10 @@ ggplot(data=exam_data,
 :::
 
 ### Working with ggtheme package
-::: {.panel-tabset}
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -112,7 +126,9 @@ ggplot(data=exam_data,
   theme_economist()
 
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -130,8 +146,10 @@ ggplot(data=exam_data,
 :::
 
 ### Working with hrbtheme package
-::: {.panel-tabset}
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -145,7 +163,9 @@ ggplot(data=exam_data,
   ggtitle("Distribution of Maths scores") +
   theme_ipsum()
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -161,8 +181,10 @@ ggplot(data=exam_data,
   theme_ipsum()
 ```
 :::
-::: {.panel-tabset}
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -178,7 +200,9 @@ ggplot(data=exam_data,
               base_size = 15,
               grid = "Y")
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -196,9 +220,12 @@ ggplot(data=exam_data,
               grid = "Y")
 ```
 :::
+
 ## Beyond Single Graph
-::: {.panel-tabset}
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -213,7 +240,9 @@ p1 <- ggplot(data=exam_data,
   ggtitle("Distribution of Maths scores")
 print(p1)
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -229,8 +258,10 @@ p1 <- ggplot(data=exam_data,
   ggtitle("Distribution of Maths scores")
 ```
 :::
-::: {.panel-tabset}
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -245,7 +276,9 @@ p2 <- ggplot(data=exam_data,
   ggtitle("Distribution of English scores")
 print(p2)
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -261,8 +294,10 @@ p2 <- ggplot(data=exam_data,
   ggtitle("Distribution of English scores")
 ```
 :::
-::: {.panel-tabset}
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -278,7 +313,9 @@ p3 <- ggplot(data=exam_data,
   ggtitle("English scores vs. Maths scores for Primary 3")
 print(p3)
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -295,16 +332,21 @@ p3 <- ggplot(data=exam_data,
   ggtitle("English scores vs. Maths scores for Primary 3")
 ```
 :::
-###  Combining two ggplot2 graphs
-::: {.panel-tabset}
+
+### Combining two ggplot2 graphs
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
 #| warning: false
 p1 + p2
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -313,16 +355,21 @@ p1 + p2
 p1 + p2
 ```
 :::
-###  Combining three ggplot2 graphs
-::: {.panel-tabset}
+
+### Combining three ggplot2 graphs
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
 #| warning: false
-(p1 / p2) | p3
+(p1 / p2) | p3  
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -331,9 +378,12 @@ p1 + p2
 (p1 / p2) | p3
 ```
 :::
+
 ### Creating a composite figure with tag
-::: {.panel-tabset}
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -341,19 +391,24 @@ p1 + p2
 ((p1 / p2) | p3) + 
   plot_annotation(tag_levels = 'I')
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
 #| warning: false
 #| fig.show: "hide"
-((p1 / p2) | p3) + 
-  plot_annotation(tag_levels = 'I')
+(p1 / p2) | p3
+  
 ```
 :::
-###  Creating figure with insert
-::: {.panel-tabset}
+
+### Creating figure with insert
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -364,7 +419,9 @@ p3 + inset_element(p2,
                    right = 0.5, 
                    top = 1)
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -377,9 +434,12 @@ p3 + inset_element(p2,
                    top = 1)
 ```
 :::
-###  Creating a composite figure by using patchwork and ggtheme
-::: {.panel-tabset}
+
+### Creating a composite figure by using patchwork and ggtheme
+
+::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -391,7 +451,9 @@ patchwork & theme_pander() & theme(axis.title.x = element_text(size=8, margin = 
                           axis.text.y = element_text(size = 6),
                           plot.title = element_text(size = 10))
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false

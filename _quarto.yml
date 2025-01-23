@@ -7,11 +7,11 @@ website:
     left:
     - text: "Hands-on Exercise"
       menu:
-        - text: "Hands-on Exercise 00"
+        - text: "Hands-on Exercise 0"
           href: "Handson_Ex/handson_ex00/Hands-on_Ex00.html"
-        - text: "Hands-on Exercise 01"
+        - text: "Hands-on Exercise 1"
           href: "Handson_Ex/handson_ex01/Hands-on_Ex01.html"
-        - text: "Hands-on Exercise 02"
+        - text: "Hands-on Exercise 2"
           href: "Handson_Ex/handson_ex02/Hands-on_Ex02.html" 
     - text: "In-class Exercise"
       menu:
