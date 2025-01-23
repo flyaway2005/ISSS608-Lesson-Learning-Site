@@ -1,0 +1,407 @@
+---
+title: "Hands-on Exercise 2"
+author: "Chang Fang Yu"
+date-modified: "last-modified"
+execute:
+  echo: True
+ 
+---
+
+## Getting Started
+### Installing and loading the required libraies
+
+```{R}
+pacman::p_load(ggrepel, patchwork, 
+               ggthemes, hrbrthemes,
+               tidyverse) 
+
+```
+### Importing data
+```{R}
+#| message: false
+#| warning: false
+exam_data <- read_csv("data/Exam_data.csv")
+```
+## Beyond ggplot2 Annotation: ggrepel
+### Working with ggrepel
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data=exam_data, 
+       aes(x= MATHS, 
+           y=ENGLISH)) +
+  geom_point(color = "darkslategray3") +
+  geom_smooth(method=lm, 
+              size=0.5) +  
+  geom_label_repel(aes(label = ID), 
+                   fontface = "bold") +
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100)) +
+  ggtitle("English scores versus Maths scores for Primary 3")
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+ggplot(data=exam_data, 
+       aes(x= MATHS, 
+           y=ENGLISH)) +
+  geom_point(color = "darkslategray3") +
+  geom_smooth(method=lm, 
+              size=0.5) +  
+  geom_label_repel(aes(label = ID), 
+                   fontface = "bold") +
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100)) +
+  ggtitle("English scores versus Maths scores for Primary 3")
+```
+:::
+
+## Beyond ggplot2 Themes
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="grey25", 
+                 fill="grey90") +
+  theme_bw() +
+  ggtitle("Distribution of Maths scores") 
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="grey25", 
+                 fill="grey90") +
+  theme_bw() +
+  ggtitle("Distribution of Maths scores") 
+```
+:::
+
+### Working with ggtheme package
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="grey25", 
+                 fill="grey90") +
+  ggtitle("Distribution of Maths scores") +
+  theme_economist()
+
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="grey25", 
+                 fill="grey90") +
+  ggtitle("Distribution of Maths scores") +
+  theme_economist()
+```
+:::
+
+### Working with hrbtheme package
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="deepskyblue3", 
+                 fill="darkslategray3") +
+  ggtitle("Distribution of Maths scores") +
+  theme_ipsum()
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="deepskyblue3", 
+                 fill="darkslategray3") +
+  ggtitle("Distribution of Maths scores") +
+  theme_ipsum()
+```
+:::
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="cyan4", 
+                 fill="azure1") +
+  ggtitle("Distribution of Maths scores") +
+  theme_ipsum(axis_title_size = 18,
+              base_size = 15,
+              grid = "Y")
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="cyan4", 
+                 fill="azure1") +
+  ggtitle("Distribution of Maths scores") +
+  theme_ipsum(axis_title_size = 18,
+              base_size = 15,
+              grid = "Y")
+```
+:::
+## Beyond Single Graph
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+p1 <- ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="deepskyblue3", 
+                 fill="darkslategray3") + 
+  coord_cartesian(xlim=c(0,100)) +
+  ggtitle("Distribution of Maths scores")
+print(p1)
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+p1 <- ggplot(data=exam_data, 
+             aes(x = MATHS)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="deepskyblue3", 
+                 fill="darkslategray3") + 
+  coord_cartesian(xlim=c(0,100)) +
+  ggtitle("Distribution of Maths scores")
+```
+:::
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+p2 <- ggplot(data=exam_data, 
+             aes(x = ENGLISH)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="deepskyblue3", 
+                 fill="darkslategray3") +
+  coord_cartesian(xlim=c(0,100)) +
+  ggtitle("Distribution of English scores")
+print(p2)
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+p2 <- ggplot(data=exam_data, 
+             aes(x = ENGLISH)) +
+  geom_histogram(bins=20, 
+                 boundary = 100,
+                 color="deepskyblue3", 
+                 fill="darkslategray3") +
+  coord_cartesian(xlim=c(0,100)) +
+  ggtitle("Distribution of English scores")
+```
+:::
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+p3 <- ggplot(data=exam_data, 
+             aes(x= MATHS, 
+                 y=ENGLISH)) +
+  geom_point(color = "darkslategray3") +
+  geom_smooth(method=lm, 
+              size=0.5) + 
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100)) +
+  ggtitle("English scores vs. Maths scores for Primary 3")
+print(p3)
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+p3 <- ggplot(data=exam_data, 
+             aes(x= MATHS, 
+                 y=ENGLISH)) +
+  geom_point(color = "darkslategray3") +
+  geom_smooth(method=lm, 
+              size=0.5) + 
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100)) +
+  ggtitle("English scores vs. Maths scores for Primary 3")
+```
+:::
+###  Combining two ggplot2 graphs
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+p1 + p2
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+p1 + p2
+```
+:::
+###  Combining three ggplot2 graphs
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+(p1 / p2) | p3
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+(p1 / p2) | p3
+```
+:::
+### Creating a composite figure with tag
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+((p1 / p2) | p3) + 
+  plot_annotation(tag_levels = 'I')
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+((p1 / p2) | p3) + 
+  plot_annotation(tag_levels = 'I')
+```
+:::
+###  Creating figure with insert
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+p3 + inset_element(p2, 
+                   left = 0.02, 
+                   bottom = 0.7, 
+                   right = 0.5, 
+                   top = 1)
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+p3 + inset_element(p2, 
+                   left = 0.02, 
+                   bottom = 0.7, 
+                   right = 0.5, 
+                   top = 1)
+```
+:::
+###  Creating a composite figure by using patchwork and ggtheme
+::: {.panel-tabset}
+### The plot
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+patchwork <- (p1 / p2) | p3
+patchwork & theme_pander() & theme(axis.title.x = element_text(size=8, margin = margin(t=5)),#above
+                          axis.title.y = element_text(size=8, margin = margin(r=5)),
+                          axis.text.x = element_text(size = 8),  
+                          axis.text.y = element_text(size = 6),
+                          plot.title = element_text(size = 10))
+```
+### The code
+```{R}
+#| echo: true
+#| message: false
+#| warning: false
+#| fig.show: "hide"
+patchwork <- (p1 / p2) | p3
+patchwork & theme_pander() & theme(axis.title.x = element_text(size=8, margin = margin(t=5)),#above
+                          axis.title.y = element_text(size=8, margin = margin(r=5)),
+                          axis.text.x = element_text(size = 8),  
+                          axis.text.y = element_text(size = 6),
+                          plot.title = element_text(size = 10))
+```
+:::
