@@ -1,0 +1,42 @@
+---
+title: "Hands-on Exercise 3"
+author: "Chang Fang Yu"
+date-modified: "last-modified"
+execute:
+  echo: True
+---
+
+## Getting Started
+
+### Installing and loading the required libraies
+
+```{R}
+#| message: false
+#| warning: false
+pacman::p_load(ggiraph, plotly, 
+               patchwork, DT, tidyverse) 
+```
+## Importing Data
+```{R}
+#| message: false
+#| warning: false
+exam_data <- read_csv("data/Exam_data.csv")
+```
+## Interactive Data Visualisation - ggiraph methods
+### Tooltip effect with tooltip aesthetic
+```{R}
+p <- ggplot(data=exam_data, 
+       aes(x = MATHS)) +
+  geom_dotplot_interactive(
+    aes(tooltip = ID),
+    stackgroups = TRUE, 
+    binwidth = 1, 
+    method = "histodot") +
+  scale_y_continuous(NULL, 
+                     breaks = NULL)
+girafe(
+  ggobj = p,
+  width_svg = 6,
+  height_svg = 6*0.618
+)
+```

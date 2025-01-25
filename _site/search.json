@@ -110,5 +110,33 @@
     "title": "Hands-on Exercise 2",
     "section": "Beyond Single Graph",
     "text": "Beyond Single Graph\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\n\n\n\np1 &lt;- ggplot(data=exam_data, \n             aes(x = MATHS)) +\n  geom_histogram(bins=20, \n                 boundary = 100,\n                 color=\"deepskyblue3\", \n                 fill=\"darkslategray3\") + \n  coord_cartesian(xlim=c(0,100)) +\n  ggtitle(\"Distribution of Maths scores\")\n\n\n\n\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\n\n\n\np2 &lt;- ggplot(data=exam_data, \n             aes(x = ENGLISH)) +\n  geom_histogram(bins=20, \n                 boundary = 100,\n                 color=\"deepskyblue3\", \n                 fill=\"darkslategray3\") +\n  coord_cartesian(xlim=c(0,100)) +\n  ggtitle(\"Distribution of English scores\")\n\n\n\n\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\n\n\n\np3 &lt;- ggplot(data=exam_data, \n             aes(x= MATHS, \n                 y=ENGLISH)) +\n  geom_point(color = \"darkslategray3\") +\n  geom_smooth(method=lm, \n              size=0.5) + \n  coord_cartesian(xlim=c(0,100),\n                  ylim=c(0,100)) +\n  ggtitle(\"English scores vs. Maths scores for Primary 3\")\n\n\n\n\n\nCombining two ggplot2 graphs\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\n\n\n\np1 + p2\n\n\n\n\n\n\nCombining three ggplot2 graphs\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n(p1 / p2) | p3\n\n\n\n\n\n\nCreating a composite figure with tag\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n(p1 / p2) | p3\n\n\n\n\n\n\nCreating figure with insert\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\n\n\n\np3 + inset_element(p2, \n                   left = 0.02, \n                   bottom = 0.7, \n                   right = 0.5, \n                   top = 1)\n\n\n\n\n\n\nCreating a composite figure by using patchwork and ggtheme\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\n\n\n\npatchwork &lt;- (p1 / p2) | p3\npatchwork & theme_pander() & theme(axis.title.x = element_text(size=8, margin = margin(t=5)),#above\n                          axis.title.y = element_text(size=8, margin = margin(r=5)),\n                          axis.text.x = element_text(size = 8),  \n                          axis.text.y = element_text(size = 6),\n                          plot.title = element_text(size = 10))"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex03/Hands-on_Ex03.html",
+    "href": "Handson_Ex/handson_ex03/Hands-on_Ex03.html",
+    "title": "Hands-on Exercise 3",
+    "section": "",
+    "text": "pacman::p_load(ggiraph, plotly, \n               patchwork, DT, tidyverse)"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#getting-started",
+    "href": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#getting-started",
+    "title": "Hands-on Exercise 3",
+    "section": "",
+    "text": "pacman::p_load(ggiraph, plotly, \n               patchwork, DT, tidyverse)"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#importing-data",
+    "href": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#importing-data",
+    "title": "Hands-on Exercise 3",
+    "section": "Importing Data",
+    "text": "Importing Data\n\nexam_data &lt;- read_csv(\"data/Exam_data.csv\")"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#interactive-data-visualisation---ggiraph-methods",
+    "href": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#interactive-data-visualisation---ggiraph-methods",
+    "title": "Hands-on Exercise 3",
+    "section": "Interactive Data Visualisation - ggiraph methods",
+    "text": "Interactive Data Visualisation - ggiraph methods\n\nTooltip effect with tooltip aesthetic\n\np &lt;- ggplot(data=exam_data, \n       aes(x = MATHS)) +\n  geom_dotplot_interactive(\n    aes(tooltip = ID),\n    stackgroups = TRUE, \n    binwidth = 1, \n    method = \"histodot\") +\n  scale_y_continuous(NULL, \n                     breaks = NULL)\ngirafe(\n  ggobj = p,\n  width_svg = 6,\n  height_svg = 6*0.618\n)"
   }
 ]
