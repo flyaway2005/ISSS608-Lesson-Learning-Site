@@ -159,5 +159,26 @@
     "title": "Hands-on Exercise 3",
     "section": "",
     "text": "DT::datatable(exam_data, class= \"compact\")\n\n\n\n\n\n\n\n\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nd &lt;- highlight_key(exam_data) \np &lt;- ggplot(d, \n            aes(ENGLISH, \n                MATHS)) + \n  geom_point(size=1) +\n  coord_cartesian(xlim=c(0,100),\n                  ylim=c(0,100))\n\ngg &lt;- highlight(ggplotly(p),        \n                \"plotly_selected\")  \n\ncrosstalk::bscols(gg,               \n                  DT::datatable(d), \n                  widths = 5)"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#getting-started-1",
+    "href": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#getting-started-1",
+    "title": "Hands-on Exercise 3",
+    "section": "Getting started",
+    "text": "Getting started\n\npacman::p_load(readxl, gifski, gapminder,\n               plotly, gganimate, tidyverse)\n\n\nImporting the data\n\ncol &lt;- c(\"Country\", \"Continent\")\nglobalPop &lt;- read_xls(\"data/GlobalPopulation.xls\",\n                      sheet=\"Data\") %&gt;%\n  mutate(across(col, as.factor)) %&gt;%\n  mutate(Year = as.integer(Year))\n\nWarning: There was 1 warning in `mutate()`.\nℹ In argument: `across(col, as.factor)`.\nCaused by warning:\n! Using an external vector in selections was deprecated in tidyselect 1.1.0.\nℹ Please use `all_of()` or `any_of()` instead.\n  # Was:\n  data %&gt;% select(col)\n\n  # Now:\n  data %&gt;% select(all_of(col))\n\nSee &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;."
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#animated-data-visualisation-gganimate-methods",
+    "href": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#animated-data-visualisation-gganimate-methods",
+    "title": "Hands-on Exercise 3",
+    "section": "Animated Data Visualisation: gganimate methods",
+    "text": "Animated Data Visualisation: gganimate methods\n\nBuilding a static population bubble plot\n\nggplot(globalPop, aes(x = Old, y = Young, \n                      size = Population, \n                      colour = Country)) +\n  geom_point(alpha = 0.7, \n             show.legend = FALSE) +\n  scale_colour_manual(values = country_colors) +\n  scale_size(range = c(2, 12)) +\n  labs(title = 'Year: {frame_time}', \n       x = '% Aged', \n       y = '% Young') \n\n\n\n\n\n\n\n\n\n\nBuilding the animated bubble plot\n\nggplot(globalPop, aes(x = Old, y = Young, \n                      size = Population, \n                      colour = Country)) +\n  geom_point(alpha = 0.7, \n             show.legend = FALSE) +\n  scale_colour_manual(values = country_colors) +\n  scale_size(range = c(2, 12)) +\n  labs(title = 'Year: {frame_time}', \n       x = '% Aged', \n       y = '% Young') +\n  transition_time(Year) +       \n  ease_aes('linear')"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#animated-data-visualisation-plotly",
+    "href": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#animated-data-visualisation-plotly",
+    "title": "Hands-on Exercise 3",
+    "section": "Animated Data Visualisation: plotly",
+    "text": "Animated Data Visualisation: plotly\n\nBuilding an animated bubble plot: ggplotly() method\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\ngg &lt;- ggplot(globalPop, \n       aes(x = Old, \n           y = Young, \n           size = Population, \n           colour = Country)) +\n  geom_point(aes(size = Population,\n                 frame = Year),\n             alpha = 0.7, \n             show.legend = FALSE) +\n  scale_colour_manual(values = country_colors) +\n  scale_size(range = c(2, 12)) +\n  labs(x = '% Aged', \n       y = '% Young')\n\nggplotly(gg)\n\n\n\n\n\n\n\n\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\ngg &lt;- ggplot(globalPop, \n       aes(x = Old, \n           y = Young, \n           size = Population, \n           colour = Country)) +\n  geom_point(aes(size = Population,\n                 frame = Year),\n             alpha = 0.7) +\n  scale_colour_manual(values = country_colors) +\n  scale_size(range = c(2, 12)) +\n  labs(x = '% Aged', \n       y = '% Young') + \n  theme(legend.position='none')\n\nggplotly(gg)\n\n\n\n\n\n\n\n\n\n\nBuilding an animated bubble plot: plot_ly() method\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\nbp &lt;- globalPop %&gt;%\n  plot_ly(x = ~Old, \n          y = ~Young, \n          size = ~Population, \n          color = ~Continent,\n          sizes = c(2, 100),\n          frame = ~Year, \n          text = ~Country, \n          hoverinfo = \"text\",\n          type = 'scatter',\n          mode = 'markers'\n          ) %&gt;%\n  layout(showlegend = FALSE)\nbp"
   }
 ]
