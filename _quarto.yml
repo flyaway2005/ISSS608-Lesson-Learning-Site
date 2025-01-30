@@ -16,9 +16,6 @@ website:
         - text: "Hands-on Exercise 3"
           href: "Handson_Ex/handson_ex03/Hands-on_Ex03.html" 
     - text: "In-class Exercise"
-      menu:
-        - text: "In-class Exercise 1"
-          href: "                   "
     - text: "Take-home Exercise"
     right:
       - href: index.qmd

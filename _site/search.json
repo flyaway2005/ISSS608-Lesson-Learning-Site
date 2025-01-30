@@ -165,7 +165,7 @@
     "href": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#getting-started-1",
     "title": "Hands-on Exercise 3",
     "section": "Getting started",
-    "text": "Getting started\n\npacman::p_load(readxl, gifski, gapminder,\n               plotly, gganimate, tidyverse)\n\n\nImporting the data\n\ncol &lt;- c(\"Country\", \"Continent\")\nglobalPop &lt;- read_xls(\"data/GlobalPopulation.xls\",\n                      sheet=\"Data\") %&gt;%\n  mutate(across(col, as.factor)) %&gt;%\n  mutate(Year = as.integer(Year))\n\nWarning: There was 1 warning in `mutate()`.\nℹ In argument: `across(col, as.factor)`.\nCaused by warning:\n! Using an external vector in selections was deprecated in tidyselect 1.1.0.\nℹ Please use `all_of()` or `any_of()` instead.\n  # Was:\n  data %&gt;% select(col)\n\n  # Now:\n  data %&gt;% select(all_of(col))\n\nSee &lt;https://tidyselect.r-lib.org/reference/faq-external-vector.html&gt;."
+    "text": "Getting started\n\npacman::p_load(readxl, gifski, gapminder,\n               plotly, gganimate, tidyverse)\n\n\nImporting the data\n\ncol &lt;- c(\"Country\", \"Continent\")\nglobalPop &lt;- read_xls(\"data/GlobalPopulation.xls\",\n                      sheet=\"Data\") %&gt;%\n  mutate(across(col, as.factor)) %&gt;%\n  mutate(Year = as.integer(Year))"
   },
   {
     "objectID": "Handson_Ex/handson_ex03/Hands-on_Ex03.html#animated-data-visualisation-gganimate-methods",

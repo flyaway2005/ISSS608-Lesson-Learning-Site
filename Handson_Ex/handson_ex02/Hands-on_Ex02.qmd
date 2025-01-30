@@ -5,6 +5,7 @@ date-modified: "last-modified"
 execute:
   echo: True
 ---
+
 # Beyond ggplot2 Fundamentals
 
 ## Getting Started

@@ -18,30 +18,39 @@ pacman::p_load(tidyverse)
 ```
 
 ### Importing data
+
 ```{r}
 #| :False
 realis2019 <- read_csv("data/REALIS2019.csv")
 ```
+
 ```{r}
 popdata_fat <- read_csv("data/PopData2019_fat.csv")
 ```
+
 ### Pivoting data
+
 ```{r}
 popdata_long <- popdata_fat %>%
   pivot_longer(c(3:21),
                names_to = "Age Group",
                values_to = "Population")
 ```
+
 ### Export and Import R data files(.rds)
+
 ```{r}
 #|eval: FALSE
 write_rds(popdata_long, "data/popData_long.rds")
 ```
+
 ```{r}
 #|echo: FALSE
 popdata_long <- read_rds("data/popdata_long.rds")
 ```
+
 ### Select and filter columns
+
 ```{r}
 #| eval: False
 realis2019_filtered <- realis2019 %>%
