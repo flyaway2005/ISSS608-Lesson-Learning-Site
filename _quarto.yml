@@ -14,9 +14,14 @@ website:
         - text: "Hands-on Exercise 2"
           href: "Handson_Ex/handson_ex02/Hands-on_Ex02.html"
         - text: "Hands-on Exercise 3"
-          href: "Handson_Ex/handson_ex03/Hands-on_Ex03.html" 
+          href: "Handson_Ex/handson_ex03/Hands-on_Ex03.html"
+        - text: "Hands-on Exercise 4"
+          href: "Handson_Ex/handson_ex04/Hands-on_Ex04.html" 
     - text: "In-class Exercise"
     - text: "Take-home Exercise"
+      menu:
+        - text: "Take-home Exercise 1"
+          href: "Takehome_Ex/Take-home_Ex1/Take-home_Ex1.html"
     right:
       - href: index.qmd
         text: "Home"

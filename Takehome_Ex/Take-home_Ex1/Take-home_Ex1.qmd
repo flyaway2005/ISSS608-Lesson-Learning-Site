@@ -1,0 +1,8 @@
+---
+title: "Take-home Exercise 1"
+author: "Chang Fang Yu"
+date-modified: "last-modified"
+execute:
+  echo: True
+---
+
