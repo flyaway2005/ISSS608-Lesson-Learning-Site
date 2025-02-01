@@ -180,5 +180,19 @@
     "title": "Hands-on Exercise 3",
     "section": "Animated Data Visualisation: plotly",
     "text": "Animated Data Visualisation: plotly\n\nBuilding an animated bubble plot: ggplotly() method\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\ngg &lt;- ggplot(globalPop, \n       aes(x = Old, \n           y = Young, \n           size = Population, \n           colour = Country)) +\n  geom_point(aes(size = Population,\n                 frame = Year),\n             alpha = 0.7, \n             show.legend = FALSE) +\n  scale_colour_manual(values = country_colors) +\n  scale_size(range = c(2, 12)) +\n  labs(x = '% Aged', \n       y = '% Young')\n\nggplotly(gg)\n\n\n\n\n\n\n\n\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\ngg &lt;- ggplot(globalPop, \n       aes(x = Old, \n           y = Young, \n           size = Population, \n           colour = Country)) +\n  geom_point(aes(size = Population,\n                 frame = Year),\n             alpha = 0.7) +\n  scale_colour_manual(values = country_colors) +\n  scale_size(range = c(2, 12)) +\n  labs(x = '% Aged', \n       y = '% Young') + \n  theme(legend.position='none')\n\nggplotly(gg)\n\n\n\n\n\n\n\n\n\n\nBuilding an animated bubble plot: plot_ly() method\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\nbp &lt;- globalPop %&gt;%\n  plot_ly(x = ~Old, \n          y = ~Young, \n          size = ~Population, \n          color = ~Continent,\n          sizes = c(2, 100),\n          frame = ~Year, \n          text = ~Country, \n          hoverinfo = \"text\",\n          type = 'scatter',\n          mode = 'markers'\n          ) %&gt;%\n  layout(showlegend = FALSE)\nbp"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex04/Hands-on_Ex04.html",
+    "href": "Handson_Ex/handson_ex04/Hands-on_Ex04.html",
+    "title": "Hands-on Exercise 4",
+    "section": "",
+    "text": "pacman::p_load(ggdist, ggridges, ggthemes,\n               colorspace, tidyverse)\n\n\n\n\n\nexam &lt;- read_csv(\"data/Exam_data.csv\")\n\nRows: 322 Columns: 7\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (4): ID, CLASS, GENDER, RACE\ndbl (3): ENGLISH, MATHS, SCIENCE\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#getting-started",
+    "href": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#getting-started",
+    "title": "Hands-on Exercise 4",
+    "section": "",
+    "text": "pacman::p_load(ggdist, ggridges, ggthemes,\n               colorspace, tidyverse)\n\n\n\n\n\nexam &lt;- read_csv(\"data/Exam_data.csv\")\n\nRows: 322 Columns: 7\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (4): ID, CLASS, GENDER, RACE\ndbl (3): ENGLISH, MATHS, SCIENCE\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
   }
 ]
