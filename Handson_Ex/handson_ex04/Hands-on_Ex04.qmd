@@ -869,25 +869,22 @@ funnel_plot(
   numerator = Death,
   denominator = Positive,
   group = `Sub-district`,
-  data_type = "PR",     #<<
-  xrange = c(0, 6500),  #<<
-  yrange = c(0, 0.05)   #<<
+  data_type = "PR",     
+  xrange = c(0, 6500),  
+  yrange = c(0, 0.05)   
 )
 ```
 ## Funnel Plot for Fair Visual Comparison: ggplot2 methods
+### FunnelPlotR methods: Makeover 1
 ```{R}
 funnel_plot(
   .data = covid19,
   numerator = Death,
   denominator = Positive,
   group = `Sub-district`,
-  data_type = "PR",   
-  xrange = c(0, 6500),  
-  yrange = c(0, 0.05),
-  label = NA,
-  title = "Cumulative COVID-19 Fatality Rate by Cumulative Total Number of COVID-19 Positive Cases", #<<           
-  x_label = "Cumulative COVID-19 Positive Cases", #<<
-  y_label = "Cumulative Fatality Rate"  #<<
+  data_type = "PR",     #<<
+  xrange = c(0, 6500),  #<<
+  yrange = c(0, 0.05)   #<<
 )
 ```
 ###  FunnelPlotR methods: Makeover 2
