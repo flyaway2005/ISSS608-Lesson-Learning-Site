@@ -96,5 +96,40 @@
     "title": "Hands-on Exercise 3",
     "section": "Animated Data Visualisation: plotly",
     "text": "Animated Data Visualisation: plotly\n\nBuilding an animated bubble plot: ggplotly() method\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\ngg &lt;- ggplot(globalPop, \n       aes(x = Old, \n           y = Young, \n           size = Population, \n           colour = Country)) +\n  geom_point(aes(size = Population,\n                 frame = Year),\n             alpha = 0.7, \n             show.legend = FALSE) +\n  scale_colour_manual(values = country_colors) +\n  scale_size(range = c(2, 12)) +\n  labs(x = '% Aged', \n       y = '% Young')\n\nggplotly(gg)\n\n\n\n\n\n\n\n\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\ngg &lt;- ggplot(globalPop, \n       aes(x = Old, \n           y = Young, \n           size = Population, \n           colour = Country)) +\n  geom_point(aes(size = Population,\n                 frame = Year),\n             alpha = 0.7) +\n  scale_colour_manual(values = country_colors) +\n  scale_size(range = c(2, 12)) +\n  labs(x = '% Aged', \n       y = '% Young') + \n  theme(legend.position='none')\n\nggplotly(gg)\n\n\n\n\n\n\n\n\n\n\nBuilding an animated bubble plot: plot_ly() method\n\nThe plotThe code\n\n\n\n\n\n\n\n\n\n\n\nbp &lt;- globalPop %&gt;%\n  plot_ly(x = ~Old, \n          y = ~Young, \n          size = ~Population, \n          color = ~Continent,\n          sizes = c(2, 100),\n          frame = ~Year, \n          text = ~Country, \n          hoverinfo = \"text\",\n          type = 'scatter',\n          mode = 'markers'\n          ) %&gt;%\n  layout(showlegend = FALSE)\nbp"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#getting-started-1",
+    "href": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#getting-started-1",
+    "title": "Hands-on Exercise 4",
+    "section": "Getting Started",
+    "text": "Getting Started\n\nInstalling and launching R packages\n\npacman::p_load(ggstatsplot, tidyverse, qqplotr)\n\n\n\nImporting data\n\nexam &lt;- read_csv(\"data/Exam_data.csv\")"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#one-sample-test-gghistostats-method",
+    "href": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#one-sample-test-gghistostats-method",
+    "title": "Hands-on Exercise 4",
+    "section": "One-sample test: gghistostats() method",
+    "text": "One-sample test: gghistostats() method\n\nset.seed(1234)\n\ngghistostats(\n  data = exam,\n  x = ENGLISH,\n  type = \"bayes\",\n  test.value = 60,\n  xlab = \"English scores\"\n)"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#two-sample-mean-test-ggbetweenstats",
+    "href": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#two-sample-mean-test-ggbetweenstats",
+    "title": "Hands-on Exercise 4",
+    "section": "Two-sample mean test: ggbetweenstats()",
+    "text": "Two-sample mean test: ggbetweenstats()\n\nggbetweenstats(\n  data = exam,\n  x = GENDER, \n  y = MATHS,\n  type = \"np\",\n  messages = FALSE\n)"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#oneway-anova-test-ggbetweenstats-method",
+    "href": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#oneway-anova-test-ggbetweenstats-method",
+    "title": "Hands-on Exercise 4",
+    "section": "Oneway ANOVA Test: ggbetweenstats() method",
+    "text": "Oneway ANOVA Test: ggbetweenstats() method\n\nggbetweenstats(\n  data = exam,\n  x = RACE, \n  y = ENGLISH,\n  type = \"p\",\n  mean.ci = TRUE, \n  pairwise.comparisons = TRUE, \n  pairwise.display = \"s\",\n  p.adjust.method = \"fdr\",\n  messages = FALSE\n)\n\n\n\n\n\n\n\n\n\nSignificant Test of Correlation: ggscatterstats()\n\nggscatterstats(\n  data = exam,\n  x = MATHS,\n  y = ENGLISH,\n  marginal = FALSE,\n  )\n\n\n\n\n\n\n\n\n\n\nSignificant Test of Association (Depedence) : ggbarstats() methods\n\nexam1 &lt;- exam %&gt;% \n  mutate(MATHS_bins = \n           cut(MATHS, \n               breaks = c(0,60,75,85,100))\n)\nggbarstats(exam1, \n           x = MATHS_bins, \n           y = GENDER)"
+  },
+  {
+    "objectID": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#getting-started-2",
+    "href": "Handson_Ex/handson_ex04/Hands-on_Ex04.html#getting-started-2",
+    "title": "Hands-on Exercise 4",
+    "section": "Getting Started",
+    "text": "Getting Started\n\npacman::p_load(readxl, performance, parameters, see)\n\n\nImporting Excel file: readxl methods\n\ncar_resale &lt;- read_xls(\"data/ToyotaCorolla.xls\", \n                       \"data\")\ncar_resale\n\n# A tibble: 1,436 × 38\n      Id Model    Price Age_08_04 Mfg_Month Mfg_Year     KM Quarterly_Tax Weight\n   &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;         &lt;dbl&gt;  &lt;dbl&gt;\n 1    81 TOYOTA … 18950        25         8     2002  20019           100   1180\n 2     1 TOYOTA … 13500        23        10     2002  46986           210   1165\n 3     2 TOYOTA … 13750        23        10     2002  72937           210   1165\n 4     3  TOYOTA… 13950        24         9     2002  41711           210   1165\n 5     4 TOYOTA … 14950        26         7     2002  48000           210   1165\n 6     5 TOYOTA … 13750        30         3     2002  38500           210   1170\n 7     6 TOYOTA … 12950        32         1     2002  61000           210   1170\n 8     7  TOYOTA… 16900        27         6     2002  94612           210   1245\n 9     8 TOYOTA … 18600        30         3     2002  75889           210   1245\n10    44 TOYOTA … 16950        27         6     2002 110404           234   1255\n# ℹ 1,426 more rows\n# ℹ 29 more variables: Guarantee_Period &lt;dbl&gt;, HP_Bin &lt;chr&gt;, CC_bin &lt;chr&gt;,\n#   Doors &lt;dbl&gt;, Gears &lt;dbl&gt;, Cylinders &lt;dbl&gt;, Fuel_Type &lt;chr&gt;, Color &lt;chr&gt;,\n#   Met_Color &lt;dbl&gt;, Automatic &lt;dbl&gt;, Mfr_Guarantee &lt;dbl&gt;,\n#   BOVAG_Guarantee &lt;dbl&gt;, ABS &lt;dbl&gt;, Airbag_1 &lt;dbl&gt;, Airbag_2 &lt;dbl&gt;,\n#   Airco &lt;dbl&gt;, Automatic_airco &lt;dbl&gt;, Boardcomputer &lt;dbl&gt;, CD_Player &lt;dbl&gt;,\n#   Central_Lock &lt;dbl&gt;, Powered_Windows &lt;dbl&gt;, Power_Steering &lt;dbl&gt;, …\n\n\n\n\nMultiple Regression Model using lm()\n\nmodel &lt;- lm(Price ~ Age_08_04 + Mfg_Year + KM + \n              Weight + Guarantee_Period, data = car_resale)\nmodel\n\n\nCall:\nlm(formula = Price ~ Age_08_04 + Mfg_Year + KM + Weight + Guarantee_Period, \n    data = car_resale)\n\nCoefficients:\n     (Intercept)         Age_08_04          Mfg_Year                KM  \n      -2.637e+06        -1.409e+01         1.315e+03        -2.323e-02  \n          Weight  Guarantee_Period  \n       1.903e+01         2.770e+01  \n\n\n\n\nModel Diagnostic: checking for multicolinearity:\n\ncheck_collinearity(model)\n\n# Check for Multicollinearity\n\nLow Correlation\n\n             Term  VIF     VIF 95% CI Increased SE Tolerance Tolerance 95% CI\n               KM 1.46 [ 1.37,  1.57]         1.21      0.68     [0.64, 0.73]\n           Weight 1.41 [ 1.32,  1.51]         1.19      0.71     [0.66, 0.76]\n Guarantee_Period 1.04 [ 1.01,  1.17]         1.02      0.97     [0.86, 0.99]\n\nHigh Correlation\n\n      Term   VIF     VIF 95% CI Increased SE Tolerance Tolerance 95% CI\n Age_08_04 31.07 [28.08, 34.38]         5.57      0.03     [0.03, 0.04]\n  Mfg_Year 31.16 [28.16, 34.48]         5.58      0.03     [0.03, 0.04]\n\ncheck_c &lt;- check_collinearity(model)\nplot(check_c)\n\n\n\n\n\n\n\n\n\n\nModel Diagnostic: checking normality assumption\n\nmodel1 &lt;- lm(Price ~ Age_08_04 + KM + \n              Weight + Guarantee_Period, data = car_resale)\ncheck_n &lt;- check_normality(model1)\nplot(check_n)\n\n\n\n\n\n\n\n\n\n\nModel Diagnostic: Check model for homogeneity of variances\n\ncheck_h &lt;- check_heteroscedasticity(model1)\nplot(check_h)\n\n\n\n\n\n\n\n\n\n\nModel Diagnostic: Complete check\n\ncheck_model(model1)\n\n\n\n\n\n\n\n\n\n\nVisualising Regression Parameters: see methods\n\nplot(parameters(model1))\n\n\n\n\n\n\n\n\n\n\nVisualising Regression Parameters: ggcoefstats() methods\n\nggcoefstats(model1, \n            output = \"plot\")"
   }
 ]
