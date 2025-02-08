@@ -1,0 +1,63 @@
+---
+title: "In-class exercise 4"
+author: "Chang Fang Yu"
+date-modified: "last-modified"
+execute:
+  echo: True
+  eval: True
+  warning: false
+  freeze: true
+---
+
+## Getting Started
+
+### Installing and loading the required libraies
+
+```{R}
+#| message: false
+#| warning: false
+pacman::p_load(haven, SmartEDA, tidymodels, ggstatsplot, tidyverse) 
+```
+
+```{R}
+
+#| message: false
+#| warning: false
+exam_data <- read_csv("data/Exam_data.csv")
+```
+
+
+
+```{R}
+#| echo: false
+#| message: false
+#| warning: false
+ggplot(data = exam_data, 
+       aes(x = ENGLISH, 
+           y = CLASS)) +
+  geom_boxplot() 
+  
+```
+
+```{R}
+ggscatterstats(
+  data = exam_data,
+  x = MATHS,
+  y = ENGLISH,
+  marginal = TRUE,
+  )
+```
+
+```{R}
+ggbetweenstats(
+  data = exam_data,
+  x = RACE, 
+  y = ENGLISH,
+  type = "p",
+  mean.ci = TRUE, 
+  pairwise.comparisons = FALSE, 
+  pairwise.display = "s",
+  p.adjust.method = "fdr",
+  messages = FALSE
+)
+```
