@@ -10,21 +10,30 @@ execute:
 ---
 
 # Visualising Distribution
+
 ## Getting Started
+
 ### Installing and loading the packages
+
 ```{R}
 pacman::p_load(ggdist, ggridges, ggthemes,
                colorspace, tidyverse)
 
 ```
+
 ### Data import
+
 ```{R}
 exam <- read_csv("data/Exam_data.csv")
 ```
+
 ## Visualising Distribution with Ridgeline Plot
+
 ### Plotting ridgeline graph: ggridges method
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -46,7 +55,9 @@ ggplot(exam,
   scale_y_discrete(name = NULL, expand = expansion(add = c(0.2, 2.6))) +
   theme_ridges()
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -70,9 +81,12 @@ ggplot(exam,
   theme_ridges()
 ```
 :::
+
 ### Varying fill colors along the x axis
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -93,7 +107,9 @@ ggplot(exam,
   scale_y_discrete(name = NULL, expand = expansion(add = c(0.2, 2.6))) +
   theme_ridges()
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -116,9 +132,12 @@ ggplot(exam,
   theme_ridges()
 ```
 :::
-###  Mapping the probabilities directly onto colour
+
+### Mapping the probabilities directly onto colour
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -133,7 +152,9 @@ ggplot(exam,
                        direction = -1) +
   theme_ridges()
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -150,8 +171,10 @@ ggplot(exam,
   theme_ridges()
 ```
 :::
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -169,7 +192,9 @@ ggplot(exam,
   scale_fill_viridis_d(name = "Quartiles") +
   theme_ridges()
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -189,8 +214,10 @@ ggplot(exam,
   theme_ridges()
 ```
 :::
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -212,7 +239,9 @@ ggplot(exam,
   ) +
   theme_ridges()
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -236,10 +265,14 @@ ggplot(exam,
   theme_ridges()
 ```
 :::
+
 ## Visualising Distribution with Raincloud Plot
+
 ### Plotting a Half Eye graph
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -252,7 +285,9 @@ ggplot(exam,
                .width = 0,
                point_colour = NA)
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -267,9 +302,12 @@ ggplot(exam,
                point_colour = NA)
 ```
 :::
+
 ### Adding the boxplot with geom_boxplot()
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -284,7 +322,9 @@ ggplot(exam,
   geom_boxplot(width = .20,
                outlier.shape = NA)
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -301,9 +341,12 @@ ggplot(exam,
                outlier.shape = NA)
 ```
 :::
+
 ### Adding the Dot Plots with stat_dots()
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -322,7 +365,9 @@ ggplot(exam,
             binwidth = .5,
             dotsize = 2)
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -343,9 +388,12 @@ ggplot(exam,
             dotsize = 2)
 ```
 :::
+
 ### Finishing touch
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -366,7 +414,9 @@ ggplot(exam,
   coord_flip() +
   theme_economist()
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -389,17 +439,25 @@ ggplot(exam,
   theme_economist()
 ```
 :::
+
 # Visual Statistical Analysis with ggstatsplot
+
 ## Getting Started
+
 ### Installing and launching R packages
+
 ```{R}
 pacman::p_load(ggstatsplot, tidyverse, qqplotr)
 ```
+
 ### Importing data
+
 ```{R}
 exam <- read_csv("data/Exam_data.csv")
 ```
+
 ## One-sample test: gghistostats() method
+
 ```{R}
 set.seed(1234)
 
@@ -412,7 +470,9 @@ gghistostats(
 )
 
 ```
+
 ## Two-sample mean test: ggbetweenstats()
+
 ```{R}
 ggbetweenstats(
   data = exam,
@@ -422,7 +482,9 @@ ggbetweenstats(
   messages = FALSE
 )
 ```
+
 ## Oneway ANOVA Test: ggbetweenstats() method
+
 ```{R}
 ggbetweenstats(
   data = exam,
@@ -436,7 +498,9 @@ ggbetweenstats(
   messages = FALSE
 )
 ```
-###  Significant Test of Correlation: ggscatterstats()
+
+### Significant Test of Correlation: ggscatterstats()
+
 ```{R}
 ggscatterstats(
   data = exam,
@@ -445,7 +509,9 @@ ggscatterstats(
   marginal = FALSE,
   )
 ```
+
 ### Significant Test of Association (Depedence) : ggbarstats() methods
+
 ```{R}
 exam1 <- exam %>% 
   mutate(MATHS_bins = 
@@ -456,67 +522,94 @@ ggbarstats(exam1,
            x = MATHS_bins, 
            y = GENDER)
 ```
+
 # Visualising Models
+
 ## Getting Started
+
 ```{R}
 pacman::p_load(readxl, performance, parameters, see)
 ```
+
 ### Importing Excel file: readxl methods
+
 ```{R}
 car_resale <- read_xls("data/ToyotaCorolla.xls", 
                        "data")
 car_resale
 ```
-###  Multiple Regression Model using lm()
+
+### Multiple Regression Model using lm()
+
 ```{R}
 model <- lm(Price ~ Age_08_04 + Mfg_Year + KM + 
               Weight + Guarantee_Period, data = car_resale)
 model
 ```
+
 ### Model Diagnostic: checking for multicolinearity:
+
 ```{R}
 check_collinearity(model)
 check_c <- check_collinearity(model)
 plot(check_c)
 ```
+
 ### Model Diagnostic: checking normality assumption
+
 ```{R}
 model1 <- lm(Price ~ Age_08_04 + KM + 
               Weight + Guarantee_Period, data = car_resale)
 check_n <- check_normality(model1)
 plot(check_n)
 ```
+
 ### Model Diagnostic: Check model for homogeneity of variances
+
 ```{R}
 check_h <- check_heteroscedasticity(model1)
 plot(check_h)
 ```
+
 ### Model Diagnostic: Complete check
+
 ```{R}
 check_model(model1)
 ```
+
 ### Visualising Regression Parameters: see methods
+
 ```{R}
 plot(parameters(model1))
 ```
-###  Visualising Regression Parameters: ggcoefstats() methods
+
+### Visualising Regression Parameters: ggcoefstats() methods
+
 ```{R}
 ggcoefstats(model1, 
             output = "plot")
 ```
+
 # Visualising Uncertainty
+
 ## Getting Started
+
 ### Installing and loading the packages
+
 ```{R}
 pacman::p_load(plotly, crosstalk, DT, 
                ggdist, ggridges, colorspace,
                gganimate, tidyverse)
 ```
+
 ### Data import
+
 ```{R}
 exam <- read_csv("data/Exam_data.csv")
 ```
+
 ## Visualizing the uncertainty of point estimates: ggplot2 methods
+
 ```{R}
 my_sum <- exam %>%
   group_by(RACE) %>%
@@ -530,6 +623,7 @@ my_sum <- exam %>%
 
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -537,8 +631,8 @@ my_sum <- exam %>%
 knitr::kable(head(my_sum), format = 'html')
 ```
 
-
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -547,9 +641,12 @@ knitr::kable(head(my_sum), format = 'html')
 knitr::kable(head(my_sum), format = 'html')
 ```
 :::
+
 ### Plotting standard error bars of point estimates
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -572,7 +669,9 @@ ggplot(my_sum) +
            alpha=1) +
   ggtitle("Standard error of mean maths score by race")
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -597,9 +696,12 @@ ggplot(my_sum) +
   ggtitle("Standard error of mean maths score by rac")
 ```
 :::
+
 ### Plotting confidence interval of point estimates
+
 ::: panel-tabset
 ### The plot
+
 ```{R}
 #| echo: false
 #| message: false
@@ -623,7 +725,9 @@ ggplot(my_sum) +
   labs(x = "Maths score",
        title = "95% confidence interval of mean maths score by race")
 ```
+
 ### The code
+
 ```{R}
 #| echo: true
 #| message: false
@@ -649,9 +753,12 @@ ggplot(my_sum) +
        title = "95% confidence interval of mean maths score by race")
 ```
 :::
-###  Visualizing the uncertainty of point estimates with interactive error bars
+
+### Visualizing the uncertainty of point estimates with interactive error bars
+
 ::: panel-tabset
 ### Original Exercise
+
 ```{R}
 #| message: false
 #| warning: false
@@ -700,7 +807,9 @@ bscols(widths = c(4,8),
          formatRound(columns=c('mean', 'sd', 'se'),
                      digits=2))
 ```
+
 ### Self-Exercising
+
 ```{R}
 #| message: false
 #| warning: false
@@ -747,8 +856,11 @@ datatable(transposed,
 
 ```
 :::
+
 ## Visualising Uncertainty: ggdist package
+
 ### Visualizing the uncertainty of point estimates: ggdist methods
+
 ```{R}
 exam %>%
   ggplot(aes(x = RACE, 
@@ -758,8 +870,10 @@ exam %>%
     title = "Visualising confidence intervals of mean math score",
     subtitle = "Mean Point + Multiple-interval plot + Halfeye")
 ```
+
 ::: panel-tabset
 ### 95% Confidence level
+
 ```{R}
 exam %>%
   ggplot(aes(x = RACE, y = MATHS, color = RACE)) +
@@ -771,7 +885,9 @@ exam %>%
     subtitle = "Median Point + Multiple-interval plot")
 
 ```
+
 ### 99% Confidence level
+
 ```{R}
 exam %>%
   ggplot(aes(x = RACE, y = MATHS, color = RACE)) +
@@ -786,6 +902,7 @@ exam %>%
 :::
 
 ### Visualizing the uncertainty of point estimates: ggdist methods
+
 ```{R}
 exam %>%
   ggplot(aes(x = RACE, 
@@ -796,7 +913,9 @@ exam %>%
     title = "Visualising confidence intervals of mean math score",
     subtitle = "Mean Point + Multiple-interval plot")
 ```
+
 ### Visualizing the uncertainty of point estimates: ggdist methods
+
 ```{R}
 #| message: false
 #| warning: false
@@ -811,11 +930,15 @@ exam %>%
     title = "Visualising confidence intervals of mean math score",
     subtitle = "Gradient + interval plot")
 ```
+
 ## Visualising Uncertainty with Hypothetical Outcome Plots (HOPs)
+
 ```{R}
 devtools::install_github("wilkelab/ungeviz")
 ```
+
 ## Visualising Uncertainty with Hypothetical Outcome Plots (HOPs)
+
 ```{R}
 set.seed(123) 
 
@@ -831,17 +954,24 @@ ggplot(data = exam, aes(x = factor(RACE), y = MATHS)) +
   theme_bw() +
   transition_states(RACE, transition_length = 1, state_length = 3)
 ```
+
 # Funnel Plots for Fair Comparisons
+
 ## Installing and Launching R Packages
+
 ```{R}
 pacman::p_load(tidyverse, FunnelPlotR, plotly, knitr)
 ```
+
 ```{R}
 covid19 <- read_csv("data/COVID-19_DKI_Jakarta.csv") %>%
   mutate_if(is.character, as.factor)
 ```
-##  FunnelPlotR methods
+
+## FunnelPlotR methods
+
 ### FunnelPlotR methods: The basic plot
+
 ```{R}
 funnel_plot(
   .data = covid19,
@@ -850,7 +980,9 @@ funnel_plot(
   group = `Sub-district`
 )
 ```
+
 ### FunnelPlotR methods: Makeover 1
+
 ```{R}
 funnel_plot(
   .data = covid19,
@@ -862,7 +994,9 @@ funnel_plot(
   yrange = c(0, 0.05)   #<<
 )
 ```
-###  FunnelPlotR methods: Makeover 2
+
+### FunnelPlotR methods: Makeover 2
+
 ```{R}
 funnel_plot(
   .data = covid19,
@@ -874,8 +1008,11 @@ funnel_plot(
   yrange = c(0, 0.05)   
 )
 ```
+
 ## Funnel Plot for Fair Visual Comparison: ggplot2 methods
+
 ### FunnelPlotR methods: Makeover 1
+
 ```{R}
 funnel_plot(
   .data = covid19,
@@ -887,7 +1024,9 @@ funnel_plot(
   yrange = c(0, 0.05)   #<<
 )
 ```
-###  FunnelPlotR methods: Makeover 2
+
+### FunnelPlotR methods: Makeover 2
+
 ```{R}
 funnel_plot(
   .data = covid19,
@@ -903,7 +1042,9 @@ funnel_plot(
   y_label = "Cumulative Fatality Rate"  #<<
 )
 ```
+
 ## Funnel Plot for Fair Visual Comparison: ggplot2 methods
+
 ```{R}
 df <- covid19 %>%
   mutate(rate = Death / Positive) %>%
@@ -911,7 +1052,9 @@ df <- covid19 %>%
   filter(rate > 0)
 fit.mean <- weighted.mean(df$rate, 1/df$rate.se^2)
 ```
+
 ### Calculate lower and upper limits for 95% and 99.9% CI
+
 ```{R}
 number.seq <- seq(1, max(df$Positive), 1)
 number.ll95 <- fit.mean - 1.96 * sqrt((fit.mean*(1-fit.mean)) / (number.seq)) 
@@ -921,7 +1064,9 @@ number.ul999 <- fit.mean + 3.29 * sqrt((fit.mean*(1-fit.mean)) / (number.seq))
 dfCI <- data.frame(number.ll95, number.ul95, number.ll999, 
                    number.ul999, number.seq, fit.mean)
 ```
+
 ### Plotting a static funnel plot
+
 ```{R}
 p <- ggplot(df, aes(x = Positive, y = rate)) +
   geom_point(aes(label=`Sub-district`), 
@@ -967,7 +1112,9 @@ p <- ggplot(df, aes(x = Positive, y = rate)) +
         legend.key.height = unit(0.3, "cm"))
 p
 ```
+
 ### Interactive Funnel Plot: plotly + ggplot2
+
 ```{R}
 fp_ggplotly <- ggplotly(p,
   tooltip = c("label", 

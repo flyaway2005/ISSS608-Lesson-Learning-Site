@@ -9,3 +9,196 @@ execute:
   freeze: true
 ---
 
+1.  **Overview**
+
+2.  **Getting Started\
+    **Setting the Analytical Tools\*\*
+
+```{R}
+pacman::p_load(tidyverse, haven, knitr,
+               patchwork, ggthemes, scales,
+               ggridges, ggpubr, gganimate, ggraph, plotly,
+               ggdist, ggtext, ggalt,
+               cowplot, ggnewscale, ggmosaic, hrbrthemes, DT,)
+```
+
+```         
+**Data Sources**
+```
+
+3.  **Data Pre-processing**
+
+    **Importing Data**
+
+```{R}
+JHA <- read_csv("data/japan_heart_attack_dataset.csv")
+```
+
+```{R}
+glimpse(JHA)
+```
+
+```{R}
+DT::datatable(JHA, class= "compact")
+```
+
+**Checking for Duplicates and Missing Values**
+
+```{R}
+JHA[duplicated(JHA),]
+```
+
+```{R}
+sum(is.na(JHA))
+```
+
+4.  **EDA**
+
+```{R}
+numeric_vars <- c("Age", "Cholesterol_Level", "BMI", "Heart_Rate", "Systolic_BP", "Diastolic_BP", "Stress_Levels")
+
+
+JHA %>% 
+  pivot_longer(cols = all_of(numeric_vars), names_to = "Variable", values_to = "Value") %>%
+  ggplot(aes(x = Value, fill = Variable)) +
+  geom_histogram(alpha = 0.5, bins = 30, color = "black") +
+  facet_wrap(~Variable, scales = "free") +
+  theme_minimal() +
+  labs(title = "Histogram of Numeric Variables")
+
+```
+
+```{R}
+categorical_vars <- c("Gender", "Region", "Smoking_History", "Diabetes_History", 
+                      "Hypertension_History", "Physical_Activity", "Diet_Quality", 
+                      "Alcohol_Consumption", "Family_History", "Heart_Attack_Occurrence")
+
+JHA %>% 
+  pivot_longer(cols = all_of(categorical_vars), names_to = "Variable", values_to = "Value") %>%
+  ggplot(aes(x = Value, fill = Variable)) +
+  geom_bar() +
+  facet_wrap(~Variable, scales = "free_x", ncol = 3) +  
+  theme_minimal() +
+  labs(title = "Distribution of Categorical Variables") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{R}
+
+ggplot(data=JHA, 
+       aes(y = BMI, 
+           x= Gender)) +
+  geom_boxplot() +
+  stat_summary(geom = "point",       
+               fun = "mean",         
+               colour ="red",        
+               size=4)    
+```
+
+```{R}
+numerical_vars <- c("Age", "Cholesterol_Level", "BMI", "Heart_Rate", 
+                    "Systolic_BP", "Diastolic_BP", "Stress_Levels")
+JHA %>%
+  pivot_longer(cols = all_of(numerical_vars), names_to = "Variable", values_to = "Value") %>%
+  ggplot(aes(x = Variable, y = Value, fill = Variable)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Boxplot of Numerical Variables",
+       x = "Variable", y = "Value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{R}
+ggplot(JHA, aes(x = Heart_Attack_Occurrence, y = Cholesterol_Level, fill = Heart_Attack_Occurrence)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Cholesterol Level by Heart Attack Occurrence",
+       x = "Heart Attack Occurrence", y = "Cholesterol Level")
+```
+
+```{R}
+ggplot(JHA, aes(x = Smoking_History, fill = Heart_Attack_Occurrence)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  labs(title = "Proportion of Heart Attack Occurrence by Smoking History",
+       x = "Smoking History", y = "Proportion")
+```
+
+```{R}
+d <- highlight_key(JHA) 
+head(JHA, 500)
+p <- ggplot(d, 
+            aes(BMI, 
+                Cholesterol_Level)) + 
+  geom_point(size=1) +
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100))
+
+gg <- highlight(ggplotly(p),        
+                "plotly_selected")  
+
+crosstalk::bscols(gg,               
+                  DT::datatable(d), 
+                  widths = 5)
+```
+
+```{R}
+ggplot(JHA, aes(x = BMI, y = Systolic_BP, color = Gender)) +
+  geom_point(alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Scatter Plot of BMI vs Systolic BP")
+```
+
+```{R}
+ggplot(JHA, aes(x = Smoking_History, fill = Hypertension_History)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  labs(title = "Proportion of Hypertension by Smoking History",
+       y = "Proportion")
+```
+
+```{R}
+library(GGally)
+
+JHA %>% 
+  select(all_of(numeric_vars)) %>%
+  ggpairs()
+```
+
+```{R}
+ggplot(data=JHA, 
+       aes(y = Cholesterol_Level, 
+           x= Gender)) +
+  geom_violin()
+
+```
+
+```{R}
+ggplot(data=JHA, 
+       aes(y = BMI, 
+           x= Gender)) +
+  geom_violin()
+
+```
+
+```{R}
+ggplot(data=JHA, 
+       aes(y = Systolic_BP , 
+           x= Region)) +
+  geom_violin()
+
+```
+
+```{R}
+ggplot(data=JHA, 
+       aes(y = BMI, 
+           x= Region)) +
+  geom_violin()
+
+```
+
+
+
+5.  **Summary and Conclusion**
+
+6.  **References**
