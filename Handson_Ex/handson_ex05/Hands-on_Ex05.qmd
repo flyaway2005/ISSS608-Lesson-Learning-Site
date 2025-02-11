@@ -86,3 +86,120 @@ plot_ly(
     ternary = ternaryAxes
   )
 ```
+# Heatmap for Visualising and Analysing Multivariate Data
+## Installing and Launching R Packages
+```{R}
+pacman::p_load(seriation, dendextend, heatmaply, tidyverse)
+```
+## Importing and Preparing The Data Set
+### Importing the data set
+```{R}
+wh <- read_csv("data/WHData-2018.csv")
+```
+### Preparing the data
+```{R}
+row.names(wh) <- wh$Country
+```
+### Transforming the data frame into a matrix
+```{R}
+wh1 <- dplyr::select(wh, c(3, 7:12))
+wh_matrix <- data.matrix(wh)
+```
+## Static Heatmap
+### heatmap() of R Stats
+```{R}
+wh_heatmap <- heatmap(wh_matrix,
+                      Rowv=NA, Colv=NA)
+```
+```{R}
+wh_heatmap <- heatmap(wh_matrix)
+```
+```{R}
+wh_heatmap <- heatmap(wh_matrix,
+                      scale="column",
+                      cexRow = 0.6, 
+                      cexCol = 0.8,
+                      margins = c(10, 4))
+```
+## Creating Interactive Heatmap
+### Working with heatmaply
+```{R}
+heatmaply(mtcars)
+```
+```{R}
+heatmaply(wh_matrix[, -c(1, 2, 4, 5)])
+```
+### Data trasformation
+Scaling method
+```{R}
+heatmaply(wh_matrix[, -c(1, 2, 4, 5)],
+          scale = "column")
+```
+Normalising method
+```{R}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]))
+```
+Percentising method
+```{R}
+heatmaply(percentize(wh_matrix[, -c(1, 2, 4, 5)]))
+```
+### Manual approach
+```{R}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          dist_method = "euclidean",
+          hclust_method = "ward.D")
+```
+### Statistical approach
+```{R}
+wh_d <- dist(normalize(wh_matrix[, -c(1, 2, 4, 5)]), method = "euclidean")
+dend_expend(wh_d)[[3]]
+```
+```{R}
+wh_clust <- hclust(wh_d, method = "average")
+num_k <- find_k(wh_clust)
+plot(num_k)
+```
+```{R}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          dist_method = "euclidean",
+          hclust_method = "average",
+          k_row = 3)
+```
+### Seriation
+```{R}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "OLO")
+```
+```{R}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "GW")
+```
+```{R}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "mean")
+```
+```{R}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "none")
+```
+### Working with colour palettes
+```{R}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "none",
+          colors = Blues)
+```
+### The finishing touch
+```{R}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          Colv=NA,
+          seriate = "none",
+          colors = Blues,
+          k_row = 5,
+          margins = c(NA,200,60,NA),
+          fontsize_row = 4,
+          fontsize_col = 5,
+          main="World Happiness Score and Variables by Country, 2018 \nDataTransformation using Normalise Method",
+          xlab = "World Happiness Indicators",
+          ylab = "World Countries"
+          )
+```
