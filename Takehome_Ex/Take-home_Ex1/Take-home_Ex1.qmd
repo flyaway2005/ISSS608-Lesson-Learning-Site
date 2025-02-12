@@ -3,7 +3,7 @@ title: "Take-home Exercise 1"
 author: "Chang Fang Yu"
 date-modified: "last-modified"
 execute:
-  echo: True
+  echo: False
   eval: True
   warning: false
   freeze: true
@@ -13,192 +13,119 @@ execute:
 
 2.  **Getting Started\
     **Setting the Analytical Tools\*\*
-
 ```{R}
 pacman::p_load(tidyverse, haven, knitr,
                patchwork, ggthemes, scales,
-               ggridges, ggpubr, gganimate, ggraph, plotly,
-               ggdist, ggtext, ggalt,
-               cowplot, ggnewscale, ggmosaic, hrbrthemes, DT,)
+               ggridges, ggpubr, gganimate, ggraph,
+               ggdist, ggtext, ggalt, dplyr,
+               cowplot, ggnewscale, ggmosaic, hrbrthemes, DT, tidymodels, plotly)
 ```
 
 ```         
 **Data Sources**
 ```
-
 3.  **Data Pre-processing**
 
     **Importing Data**
 
 ```{R}
-JHA <- read_csv("data/japan_heart_attack_dataset.csv")
+Ship <- read_csv("data/Ship_Performance_Dataset.csv")
 ```
-
 ```{R}
-glimpse(JHA)
+glimpse(Ship)
 ```
-
 ```{R}
-DT::datatable(JHA, class= "compact")
+DT::datatable(Ship, class= "compact")
 ```
-
 **Checking for Duplicates and Missing Values**
-
 ```{R}
-JHA[duplicated(JHA),]
+Ship[duplicated(Ship),]
 ```
-
 ```{R}
-sum(is.na(JHA))
+sum(is.na(Ship))
 ```
 
 4.  **EDA**
 
 ```{R}
-numeric_vars <- c("Age", "Cholesterol_Level", "BMI", "Heart_Rate", "Systolic_BP", "Diastolic_BP", "Stress_Levels")
+numerical_vars <- c("Speed_Over_Ground_knots", "Distance_Traveled_nm",
+                    "Draft_meters", "Cargo_Weight_tons", "Turnaround_Time_hours", "Efficiency_nm_per_kWh","Seasonal_Impact_Score", "Weekly_Voyage_Count", "Average_Load_Percentage", "Engine_Power_kW", "Operational_Cost_USD", "Revenue_per_Voyage_USD" )
 
 
-JHA %>% 
-  pivot_longer(cols = all_of(numeric_vars), names_to = "Variable", values_to = "Value") %>%
-  ggplot(aes(x = Value, fill = Variable)) +
+numerical_data <- Ship %>%
+  select(all_of(numerical_vars))
+
+
+ship_long_num <- Ship %>%
+  pivot_longer(cols = all_of(numerical_vars), names_to = "Variable", values_to = "Value")
+
+p <- ggplot(ship_long_num, aes(x = Value, fill = Variable)) +
   geom_histogram(alpha = 0.5, bins = 30, color = "black") +
-  facet_wrap(~Variable, scales = "free") +
+  facet_wrap(~ Variable, scales = "free", ncol = 3) + 
   theme_minimal() +
+  theme(
+    plot.margin = margin(10, 10, 30, 10),
+    axis.text.x = element_blank(),  # 隱藏 x 軸標籤
+    legend.text = element_text(size = 7),
+    panel.spacing = unit(2, "cm")
+  ) +
   labs(title = "Histogram of Numeric Variables")
 
+interactive_p <- ggplotly(p)
+
+
+interactive_p
 ```
 
 ```{R}
-categorical_vars <- c("Gender", "Region", "Smoking_History", "Diabetes_History", 
-                      "Hypertension_History", "Physical_Activity", "Diet_Quality", 
-                      "Alcohol_Consumption", "Family_History", "Heart_Attack_Occurrence")
 
-JHA %>% 
-  pivot_longer(cols = all_of(categorical_vars), names_to = "Variable", values_to = "Value") %>%
-  ggplot(aes(x = Value, fill = Variable)) +
+numerical_vars_1 <- c("Speed_Over_Ground_knots", "Engine_Power_kW", "Distance_Traveled_nm", 
+                    "Cargo_Weight_tons", "Operational_Cost_USD", "Revenue_per_Voyage_USD", "Turnaround_Time_hours", "Efficiency_nm_per_kWh", "Seasonal_Impact_Score",
+                    "Weekly_Voyage_Count", "Average_Load_Percentage")
+
+ship_long <- Ship %>%
+  pivot_longer(cols = all_of(numerical_vars_1), names_to = "Variable", values_to = "Value")
+
+p <- ggplot(ship_long, aes(x = Variable, y = Value, fill = Variable)) +
+  geom_boxplot(outlier.color = "red", outlier.size = 5) +
+  facet_wrap(~ Variable, scales = "free", ncol = 3) +  
+  theme_minimal() +
+  theme(axis.text.x = element_text(hjust = 1, size = 7),  
+        strip.text = element_text(size = 8),  
+        legend.position = "bottom",
+         panel.spacing = unit(1, "cm") ) +  
+  labs(title = "Facet Wrap Box Plot of Numerical Variables")
+
+ggplotly(p)
+
+
+```
+
+```{R}
+categorical_vars <- c("Ship_Type", "Route_Type", "Engine_Type", 
+                      "Maintenance_Status", "Weather_Condition")
+
+ship_long_cat <- Ship %>%
+  pivot_longer(cols = all_of(categorical_vars), names_to = "Variable", values_to = "Category")
+
+p <- ggplot(ship_long_cat, aes(x = Category, fill = Category)) +
   geom_bar() +
-  facet_wrap(~Variable, scales = "free_x", ncol = 3) +  
+  facet_wrap(~ Variable, scales = "free_x", ncol = 3) +  
   theme_minimal() +
-  labs(title = "Distribution of Categorical Variables") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),  
+    strip.text = element_text(size = 12),  
+    legend.position = "none",  
+    panel.spacing = unit(4, "cm")  
+  ) +
+  labs(title = "Distribution of Categorical Variables", x = "Category", y = "Count")
+
+p_interactive <- ggplotly(p, tooltip = c("x", "y"))
+
+p_interactive
 ```
-
-```{R}
-
-ggplot(data=JHA, 
-       aes(y = BMI, 
-           x= Gender)) +
-  geom_boxplot() +
-  stat_summary(geom = "point",       
-               fun = "mean",         
-               colour ="red",        
-               size=4)    
-```
-
-```{R}
-numerical_vars <- c("Age", "Cholesterol_Level", "BMI", "Heart_Rate", 
-                    "Systolic_BP", "Diastolic_BP", "Stress_Levels")
-JHA %>%
-  pivot_longer(cols = all_of(numerical_vars), names_to = "Variable", values_to = "Value") %>%
-  ggplot(aes(x = Variable, y = Value, fill = Variable)) +
-  geom_boxplot() +
-  theme_minimal() +
-  labs(title = "Boxplot of Numerical Variables",
-       x = "Variable", y = "Value") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-```{R}
-ggplot(JHA, aes(x = Heart_Attack_Occurrence, y = Cholesterol_Level, fill = Heart_Attack_Occurrence)) +
-  geom_boxplot() +
-  theme_minimal() +
-  labs(title = "Cholesterol Level by Heart Attack Occurrence",
-       x = "Heart Attack Occurrence", y = "Cholesterol Level")
-```
-
-```{R}
-ggplot(JHA, aes(x = Smoking_History, fill = Heart_Attack_Occurrence)) +
-  geom_bar(position = "fill") +
-  theme_minimal() +
-  labs(title = "Proportion of Heart Attack Occurrence by Smoking History",
-       x = "Smoking History", y = "Proportion")
-```
-
-```{R}
-d <- highlight_key(JHA) 
-head(JHA, 500)
-p <- ggplot(d, 
-            aes(BMI, 
-                Cholesterol_Level)) + 
-  geom_point(size=1) +
-  coord_cartesian(xlim=c(0,100),
-                  ylim=c(0,100))
-
-gg <- highlight(ggplotly(p),        
-                "plotly_selected")  
-
-crosstalk::bscols(gg,               
-                  DT::datatable(d), 
-                  widths = 5)
-```
-
-```{R}
-ggplot(JHA, aes(x = BMI, y = Systolic_BP, color = Gender)) +
-  geom_point(alpha = 0.5) +
-  theme_minimal() +
-  labs(title = "Scatter Plot of BMI vs Systolic BP")
-```
-
-```{R}
-ggplot(JHA, aes(x = Smoking_History, fill = Hypertension_History)) +
-  geom_bar(position = "fill") +
-  theme_minimal() +
-  labs(title = "Proportion of Hypertension by Smoking History",
-       y = "Proportion")
-```
-
-```{R}
-library(GGally)
-
-JHA %>% 
-  select(all_of(numeric_vars)) %>%
-  ggpairs()
-```
-
-```{R}
-ggplot(data=JHA, 
-       aes(y = Cholesterol_Level, 
-           x= Gender)) +
-  geom_violin()
-
-```
-
-```{R}
-ggplot(data=JHA, 
-       aes(y = BMI, 
-           x= Gender)) +
-  geom_violin()
-
-```
-
-```{R}
-ggplot(data=JHA, 
-       aes(y = Systolic_BP , 
-           x= Region)) +
-  geom_violin()
-
-```
-
-```{R}
-ggplot(data=JHA, 
-       aes(y = BMI, 
-           x= Region)) +
-  geom_violin()
-
-```
-
-
 
 5.  **Summary and Conclusion**
 
 6.  **References**
+
