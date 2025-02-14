@@ -235,7 +235,7 @@ plot(2:10, sil_values, type = "b", pch = 19, frame = FALSE,
      xlab = "Number of Clusters K", ylab = "Average Silhouette Score",
      main = "Silhouette Method for Optimal K")
 ```
-Conclusion of 5-1: k value may be 4 or 5
+Conclusion of 5-1: k value may be 3
 
 ### 5-2. Perform PCA
 
@@ -305,14 +305,14 @@ sapply(Ship_pca_df, class)
 
 
 ### 5-4. Perform k-means clustering
-When k=4
+
 ::: panel-tabset
-# Result(k=4)
+# Result
 ```{R}
 #|echo: TRUE
 set.seed(123)
 kmeans_result <- kmeans(Ship_pca_df, centers = 4, nstart = 25)
-Ship_pca_df$Cluster <- as.factor(kmeans_result$cluster)  # 加入聚類結果
+Ship_pca_df$Cluster <- as.factor(kmeans_result$cluster) 
 table(Ship_pca_df$Cluste)
 ```
 # Visualize PC 1 vs.PC 2
@@ -344,47 +344,40 @@ ggplotly(p)
 
 ```{R}
 library(plotly)
-ggplot(Ship_pca_df, aes(x = PC2, y = PC3, color = Cluster)) +
+p <- ggplot(Ship_pca_df, aes(x = PC2, y = PC3, color = Cluster)) +
   geom_point(alpha = 0.6, size = 2) +
   theme_minimal() +
   labs(title = "K-Means Clustering Visualization (PC2 vs PC3)",
        x = "Principal Component 2",
        y = "Principal Component 3") +
   theme(legend.title = element_blank())
+
+ggplotly(p)
 ```
 # Visualize PC 4 vs.PC 5
 ```{R}
-ggplot(Ship_pca_df, aes(x = PC4, y = PC5, color = Cluster)) +
+p <- ggplot(Ship_pca_df, aes(x = PC4, y = PC5, color = Cluster)) +
   geom_point(alpha = 0.6, size = 2) +
   theme_minimal() +
   labs(title = "K-Means Clustering Visualization (PC4 vs PC5)",
        x = "Principal Component 4",
        y = "Principal Component 5") +
   theme(legend.title = element_blank())
+
+ggplotly(p)
 ```
 
-# t-SNE 
-```{R}
-library(Rtsne)
-tsne_result <- Rtsne(Ship_scaled, dims = 2, perplexity = 30, verbose = TRUE)
-Ship_pca_df$TSNE1 <- tsne_result$Y[,1]
-Ship_pca_df$TSNE2 <- tsne_result$Y[,2]
 
-ggplot(Ship_pca_df, aes(x = TSNE1, y = TSNE2, color = Cluster)) +
-  geom_point(alpha = 0.6, size = 2) +
-  theme_minimal() +
-  labs(title = "K-Means Clustering Visualization (t-SNE)",
-       x = "t-SNE Dimension 1",
-       y = "t-SNE Dimension 2") +
-  theme(legend.title = element_blank())
-```
 :::
 
 Conclusion from k-means visualization: PC4 vs. PC5 has better clustering effect.
+
+
 Next, by PCA Loading plot, we can interpret the importance of features in reducing dimensionality while retaining essential information.
 The first 5 principal components (PCs) are selected ([, 1:5]), which means only the top five components are retained.
 
 ### 5-5. PCA Loadings Plot
+
 ::: panel-tabset
 # Plot table 
 ```{R}
@@ -416,6 +409,7 @@ ggplot(pca_loadings_long, aes(x = variable, y = Variable, fill = value)) +
 
 Next, we are going to perform variable importance analysis based on the PCA (Principal Component Analysis) loadings. It aims to identify the most influential variables in the dataset by analyzing their contributions across the first five principal components (PCs).
 Then we select the top 10 most contributing variables before proceeding with PCA.
+
 ### 5-6. Variable importance analysis
 ```{R}
 #| include: false
@@ -438,7 +432,7 @@ print(top_10_vars)
 class(Ship_encoded)
 
 ```
-::: panel-tabset
+
 # PCA result
 ```{R}
 
@@ -454,6 +448,7 @@ summary(pca_result_new)
 ```
 # 2D plot
 ```{R}
+#| include: false
 pca_var <- data.frame(PC = 1:length(pca_result_new$sdev), 
                       Variance = cumsum(pca_result_new$sdev^2) / sum(pca_result_new$sdev^2))
 
@@ -463,11 +458,11 @@ ggplot(pca_var, aes(x = PC, y = Variance)) +
        x = "Principal Component", y = "Cumulative Variance")
 
 ```
-:::
 
-We select PC 1-3 to perform PCA 3D visualization and k means
+
+We select PC 1-5 to perform PCA 3D visualization and k means
 ```{R}
-selected_pcs <- pca_result_new$x[, 1:3]  
+selected_pcs <- pca_result_new$x[, 1:5]  
 selected_pcs_df <- as.data.frame(selected_pcs)
 
 ```
@@ -477,110 +472,144 @@ kmeans_result <- kmeans(selected_pcs_df, centers = 5, nstart = 25)
 selected_pcs_df$Cluster <- as.factor(kmeans_result$cluster)
 ```
 
-# 3D visualization
+# PCA 3D visualization
 ```{R}
-pca_df <- data.frame(pca_result_new$x[, 1:3])
-colnames(pca_df) <- c("PC1", "PC2", "PC3")
+pca_df <- data.frame(pca_result_new$x[, 1:5])
+colnames(pca_df) <- c("PC3", "PC4", "PC5")
 
-plot_ly(pca_df, x = ~PC1, y = ~PC2, z = ~PC3, type = "scatter3d", mode = "markers")
+plot_ly(pca_df, x = ~PC3, y = ~PC4, z = ~PC5, type = "scatter3d", mode = "markers")
 ```
+```{R}
+#| include: false
+dim(pca_result_new$rotation[, 1:5])
+```
+```{R}
+dim(selected_pcs_df)
+head(selected_pcs_df)
+```
+
 
 ### 5-8. K means result
-
-::: panel-tabset
-# k = 4
+Check appropriate K by Silhouette Score
 ```{R}
+library(cluster)
+
+for (k in 2:6) {  # 測試 K=2 到 K=6
+  kmeans_model <- kmeans(pca_df, centers = k, nstart = 25)
+  silhouette_score <- silhouette(kmeans_model$cluster, dist(pca_df))
+  avg_sil <- mean(silhouette_score[, 3])
+  print(paste("K =", k, "Silhouette Score:", avg_sil))
+}
+```
+The result show that k=5 is the best choice, so we perform k means clustering with k = 5.
+
+
+```{R}
+#| include: false
 set.seed(123)
-kmeans_result <- kmeans(pca_df[, 1:3], centers = 4, nstart = 25)
+kmeans_result <- kmeans(pca_df[, 1:5], centers = 5, nstart = 25)
+
 pca_df$Cluster <- as.factor(kmeans_result$cluster)
 
-plot_ly(pca_df, x = ~PC1, y = ~PC2, z = ~PC3, 
-        color = ~Cluster, colors = c("red", "blue", "green", "purple"), 
-        type = "scatter3d", mode = "markers", marker = list(size = 5)) %>%
-  layout(title = "K-Means Clustering Visualization (PC1 vs PC2 vs PC3)")
-
+head(pca_df)
 ```
-
-# k = 5
+The plot:
 ```{R}
-# k=5 potly
-library(cluster)  
-library(plotly)  
-
-set.seed(123)
-k_optimal <- 5  # 選擇 K=5
-
-kmeans_result <- kmeans(pca_result_new$x[, 1:3], centers = k_optimal, nstart = 25)
-
-pca_clustered <- as.data.frame(pca_result_new$x[, 1:3])
-pca_clustered$Cluster <- as.factor(kmeans_result$cluster)
-
-plot_data <- plot_ly(
-  data = pca_clustered, 
-  x = ~PC1, y = ~PC2, z = ~PC3, 
-  color = ~Cluster, 
-  colors = c("red", "blue", "green", "purple"), # 自訂顏色
-  type = "scatter3d", 
-  mode = "markers",
-  marker = list(size = 5),
-  text = ~paste("PC1:", round(PC1, 3), "<br>",
-                "PC2:", round(PC2, 3), "<br>",
-                "PC3:", round(PC3, 3), "<br>",
-                "Cluster:", Cluster)
-) %>%
-  layout(
-    title = "3D K-Means Clustering with Interactivity",
-    scene = list(
-      xaxis = list(title = "PC1"),
-      yaxis = list(title = "PC2"),
-      zaxis = list(title = "PC3")
-    )
-  )
-plot_data
+plot_ly(pca_df, x = ~PC3, y = ~PC4, z = ~PC5,
+        color = ~Cluster, colors = c("red", "blue", "green", "purple", "grey"),
+        type = "scatter3d", mode = "markers",
+        marker = list(size = 5)) %>%
+  layout(title = "K-Means Clustering Visualization (PC3 vs PC4 vs PC5)")
 ```
-
-:::
+```{R}
+colnames(pca_df)
+```
 
 ### 5-9. Clustering Characterize
 
 To understand the characteristics of each cluster, we need to reverse the PCA transformation to reconstruct the data and calculate the mean values of numerical variables for each cluster. Additionally, we analyze the contribution of categorical variables to each cluster, allowing us to compute the distribution of categorical variables within each cluster and visualize the results.
 
 
+5.9.1. Reverse PCA 
 ```{R}
-dim(Ship)  # 檢查行數和列數
-head(Ship) # 查看前幾行
+
+selected_pcs_df <- pca_df[, c("PC3", "PC4", "PC5", "Cluster")]
+
+selected_pcs_matrix <- as.matrix(selected_pcs_df[, c("PC3", "PC4", "PC5")])
+
+
+selected_pcs_matrix <- as.matrix(selected_pcs_df[, c("PC3", "PC4", "PC5")])
+
+colnames(restored_data) <- colnames(Ship_selected)
+
+restored_data <- as.data.frame(restored_data)
+
+restored_data$Cluster <- selected_pcs_df$Cluster
+
+head(restored_data)
+dim(restored_data)
+
 ```
-```{R}
-Ship <- Ship %>% drop_na(Maintenance_Status)
-```
-```{R}
-dim(Ship)  # 檢查行數和列數
-head(Ship) # 查看前幾行
-```
-
-5.9.1. Reverse PCA and 
-
-```{R}
-pca_data <- as.matrix(pca_clustered[, c("PC1", "PC2", "PC3")]) 
-
-original_values <- pca_data %*% t(pca_result_new$rotation[, 1:3])
-
-cluster_5_data <- original_values[kmeans_result$cluster == 5, ]
-```
-計算每個聚類的變數均值
-
-
+Calculate the mean of numerical variables:
 
 ```{R}
-# 原始數據（標準化前的資料），加上 cluster 分類結果
-Ship$Cluster <- as.factor(kmeans_result$cluster)
+library(dplyr)
 
-# 計算每個變數在不同 Cluster 中的平均值
-cluster_summary <- aggregate(. ~ Cluster, data = Ship, mean)
+if(!"Cluster" %in% colnames(restored_data)) {
+  stop("Error: 'Cluster' column not found in restored_data.")
+}
 
-# 檢視結果
-print(cluster_summary)
+numerical_summary <- restored_data %>%
+  group_by(Cluster) %>%
+  summarise(across(where(is.numeric), mean, na.rm = TRUE))
+
+print(numerical_summary)
+
 ```
+```{R}
+sapply(restored_data, class)
+```
+```{R}
+# 確保某些變數為 factor
+restored_data <- restored_data %>%
+  mutate(across(c("Ship_Type_Fish Carrier", "Route_Type_Transoceanic", "Weather_Condition_Moderate"), as.factor))
+
+# 再次檢查類別變數
+sapply(restored_data, class)
+```
+```{R}
+library(dplyr)
+library(tidyr)
+
+# 確保 restored_data 包含 Cluster 變數
+if(!"Cluster" %in% colnames(restored_data)) {
+  stop("Error: 'Cluster' column not found in restored_data.")
+}
+
+# 確保類別變數正確轉換為 factor
+restored_data <- restored_data %>%
+  mutate(across(where(is.character), as.factor))
+
+# 確保至少有一個類別變數
+categorical_vars <- restored_data %>% select(where(is.factor), Cluster)
+if(ncol(categorical_vars) <= 1) {
+  stop("Error: No categorical variables found in restored_data.")
+}
+
+# 計算類別變數在每個 Cluster 內的分佈
+categorical_summary <- categorical_vars %>%
+  pivot_longer(cols = -Cluster, names_to = "Variable", values_to = "Category") %>%
+  group_by(Cluster, Variable, Category) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  group_by(Cluster, Variable) %>%
+  mutate(Percentage = Count / sum(Count) * 100)
+
+# 顯示結果
+print(categorical_summary)
+```
+
+
+
 ```{R}
 Ship$cluster <- kmeans_result$cluster
 ```
