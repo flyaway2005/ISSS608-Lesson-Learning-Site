@@ -323,9 +323,11 @@ plot(2:10, sil_values, type = "b", pch = 19, frame = FALSE,
      xlab = "Number of Clusters K", ylab = "Average Silhouette Score",
      main = "Silhouette Method for Optimal K")
 ```
+:::
+
 Find the best k value =3
 
-### 5-2. Perform PCA
+### Perform PCA
 
 Result
 ```{R}
@@ -349,9 +351,7 @@ print(screeplot)
 ```
 
 
-### 5-3. New Dimension-reduced dataset
-
-#### 2D
+### Perform Clustering Analysis
 From the PCA results, we selected the top 20 components and transformed the data into a new dimension-reduced dataset.
 K = 3
 We only show PC4 vs. PC5 which has better clustering effect.
@@ -443,7 +443,6 @@ ggplot(loadings_melt, aes(x = variable, y = Feature, fill = value)) +
 ```
 
 
-
 Next, we are going to figure out the characteristics of 3 cluster.
 
 First, calculate the mean of each cluster in PCA.
@@ -465,30 +464,28 @@ numeric_summary <- reconstructed_data %>%
 
 print(numeric_summary)
 ```
+Below, we visualize the mean and standard deviation of each principal component (PC).
+### Plot PC by mean and Std
 ```{R}
 library(ggplot2)
 library(reshape2)
 library(dplyr)
 
-# 确保只选择 PC1-PC20 的 mean 和 sd
 top_20_features <- numeric_summary %>%
   select(Cluster, matches("^PC[1-9]|^PC1[0-9]|^PC20"))  # 选 PC1 到 PC20 的列
 
-# 检查列名
 print(colnames(top_20_features))
 
-# 数据变长格式（melt）
 numeric_melt <- melt(top_20_features, id.vars = "Cluster")
 
-# 分离均值和标准差
 numeric_mean <- numeric_melt[grep("_mean$", numeric_melt$variable), ]
 numeric_sd <- numeric_melt[grep("_sd$", numeric_melt$variable), ]
 
-# 修正变量名称，去掉 "_mean" 和 "_sd"
+
 numeric_mean$variable <- gsub("_mean", "", numeric_mean$variable)
 numeric_sd$variable <- gsub("_sd", "", numeric_sd$variable)
 
-# 画带误差条的柱状图
+
 ggplot(numeric_mean, aes(x = variable, y = value, fill = Cluster)) +
   geom_bar(stat = "identity", position = "dodge") +
   geom_errorbar(data = numeric_sd, aes(ymin = numeric_mean$value - value, ymax = numeric_mean$value + value),
@@ -498,76 +495,53 @@ ggplot(numeric_mean, aes(x = variable, y = value, fill = Cluster)) +
 
 
 ```
+
 ```{R}
-library(ggplot2)
-library(reshape2)
 
+pca_result <- prcomp(Ship_scaled, center = TRUE, scale. = TRUE)
+pca_data <- as.data.frame(pca_result$x[, 1:20])  
 
-pca_melt <- melt(cluster_pca_summary, id.vars = "Cluster")
+set.seed(42)
+kmeans_result <- kmeans(pca_data, centers = 3)
 
-ggplot(pca_melt, aes(x = variable, y = value, group = Cluster, color = Cluster)) +
-  geom_line(size = 1) +
-  geom_point(size = 3) +
-  labs(title = "Cluster Projection on PCA Axes", x = "Principal Component", y = "Mean Value") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+Ship_encoded$Cluster <- as.factor(kmeans_result$cluster)
 ```
-```{R}
-library(dplyr)
-library(tidyr)
-library(ggplot2)
 
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-
-# 確保變數名稱與 One-Hot 編碼的結果一致
-encoded_categorical_vars <- pca_data %>%
-    select(Cluster, starts_with("Engine_Type"), 
-                  starts_with("Route_Type"), 
-                  starts_with("Ship_Type"), 
-                  starts_with("Weather_Condition"), 
-                  starts_with("Maintenance_Status"))
-
-# 確保數據正確
-print(colnames(encoded_categorical_vars))
-
-# 計算各類別變數的均值作為比例
-categorical_proportion <- encoded_categorical_vars %>%
-    group_by(Cluster) %>%
-    summarise(across(where(is.numeric), mean, na.rm = TRUE)) %>%
-    pivot_longer(cols = everything(), names_to = "Variable", values_to = "Proportion")
-
-# 輸出數據檢查
-print(categorical_proportion)
-
-# 視覺化結果
-ggplot(categorical_proportion, aes(x = as.factor(Cluster), y = Proportion, fill = Variable)) +
-    geom_bar(stat = "identity", position = "dodge") +
-    labs(title = "Proportion of Encoded Categorical Variables in Each Cluster",
-         x = "Cluster", y = "Proportion") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1),
-          legend.position = "right")
+### Distribution of categorial variables by Cluster 
+Below is a visualization where we can observe the distribution of categorical variables in each cluster.
 
 
-```
 ```{R}
 
-ggplot(categorical_proportion, aes(x = as.factor(Cluster), y = Proportion, fill = Variable)) +
-  geom_bar(stat = "identity", position = "stack") +  
-  labs(title = "Proportion of Encoded Categorical Variables in Each Cluster",
-       x = "Cluster", y = "Proportion") +
+set.seed(42)
+kmeans_result <- kmeans(pca_data, centers = 3) 
+Ship_encoded$Cluster <- as.factor(kmeans_result$cluster)  
+
+
+category_means <- Ship_encoded %>%
+  group_by(Cluster) %>%
+  summarise(across(starts_with("Engine_Type") | starts_with("Route_Type") | 
+                   starts_with("Ship_Type") | starts_with("Weather_Condition") | 
+                   starts_with("Maintenance_Status"), mean))
+
+
+category_melt <- pivot_longer(category_means, cols = -Cluster, names_to = "Category", values_to = "Proportion")
+
+#  Stacked Bar Chart
+ggplot(category_melt, aes(x = as.factor(Cluster), y = Proportion, fill = Category)) +
+  geom_bar(stat = "identity", position = "fill") +  
+  labs(title = "Categorical Feature Proportions by Cluster",
+       x = "Cluster",
+       y = "Proportion") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "right")  
-
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
 ```
 
 
 
 
-5. **Summary and Conclusion**
+## Summary and Conclusion
 
-6.  **References**
+## References
 
