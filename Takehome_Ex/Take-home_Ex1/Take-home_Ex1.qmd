@@ -10,50 +10,50 @@ execute:
 ---
 # Ship Performace Clustering Analysis
 
-## 1. Overview
+##  Overview
 In this exercise, we are going to utilize The Ship Performance Clustering Dataset to perform a clustering analysis. This dataset comproses numerical and categorical features representing different ship types, operational characteristics and other facters, enabling the segmentation of vessels based on key performance metrics, providing insights into their efficiency, cost-effectiveness and operational behaviors.
 
-### 1-1. Methodology and Tools
+### Methodology and Tools
 This analysis was conducted by R Studio, leveraging various statistical and visualization packages to facilitate data preprocessing, clustering, and result interpretation. The following R packages were employed:
 ```{R}
 #|echo: TRUE
 pacman::p_load(tidyverse, haven, knitr,
                patchwork, ggthemes, scales,
-               ggridges, ggpubr, gganimate, ggraph,
-              plotly, caret, fastDummies, factoextra, cluster, Rtsne, ggfortify, plot3d, rgl)
+               ggridges, ggpubr, gganimate, ggraph,corrplot, ggstatsplot,
+              plotly, caret, fastDummies, factoextra, cluster, Rtsne, ggfortify, BiocManager, rgl, ggthemes,
+               colorspace, ggdist)
 ```
-### 1-2. Data Sources
+### Data Sources
 
 [The Ship Performance Clustering](https://www.kaggle.com/datasets/jeleeladekunlefijabi/ship-performance-clustering-dataset/data)
 
 
-## 2. Data Pre-processing
-### 2-1. Importing Data
-Data Information
+## Data Pre-processing
 
 ```{R}
 Ship <- read_csv("data/Ship_Performance_Dataset.csv")
 ```
-### 2-2. Data First Glimpse by Glimpse() and Datatable
+### 2-1. Data First Glimpse by Glimpse() and Datatable
 Glimpse() shows it consists of 2736 rows and 18 columns, including 1 date type, 5 categorical type, and 12 numerical type. 
 By Datatable, We can check the detail of the dataset.
 
 ::: panel-tabset
+
 #Glimpse
-```{R, results='asis'}
+```{R}
 #|echo: TRUE
-cat('<div style="max-height: 250px; overflow-y: auto;">')
+cat('<div style="max-height: 200px; overflow-y: auto;">')
 glimpse(Ship)
 cat('</div>')
 ```
 # Datatable
 
 ```{R}
-cat('<div style="max-height: 250px; overflow-y: auto;">')
+cat('<div style="max-height: 200px; overflow-y: auto;">')
 DT::datatable(Ship, class= "compact")
 ```
 :::
-### 2-3. Data Sanity Check 
+### Data Sanity Check 
 Checking for Duplicates and Missing Values
 Duplicates
 ```{R}
@@ -63,8 +63,11 @@ Missing Values
 ```{R}
 sum(is.na(Ship))
 ```
-## 3.Exploratory Data Analysis(EDA)
-### 3-1.The Distribution of Numerical Variables
+## Exploratory Data Analysis(EDA)
+
+::: panel-tabset
+
+# The Distribution of Numerical Variables
 ```{R}
 numerical_vars <- c("Speed_Over_Ground_knots", "Distance_Traveled_nm",
                     "Draft_meters", "Cargo_Weight_tons", "Turnaround_Time_hours", "Efficiency_nm_per_kWh","Seasonal_Impact_Score", "Weekly_Voyage_Count", "Average_Load_Percentage", "Engine_Power_kW", "Operational_Cost_USD", "Revenue_per_Voyage_USD" )
@@ -94,8 +97,8 @@ interactive_p <- ggplotly(p)
 
 interactive_p
 ```
-### 3-2. Box Plot of Numerical Variables
-From the box plot, we can check there is no outliers existng in the data set.
+# Box Plot of Numerical Variables
+
 ```{R}
 
 numerical_vars_1 <- c("Speed_Over_Ground_knots", "Engine_Power_kW", "Distance_Traveled_nm", 
@@ -109,8 +112,8 @@ p <- ggplot(ship_long, aes(x = Variable, y = Value, fill = Variable)) +
   geom_boxplot(outlier.color = "red", outlier.size = 5) +
   facet_wrap(~ Variable, scales = "free", ncol = 3) +  
   theme_minimal() +
-  theme(axis.text.x = element_text(hjust = 1, size = 7),  
-        strip.text = element_text(size = 8),  
+  theme(axis.text.x = element_text(hjust = 1, size = 5),  
+         
         legend.position = "bottom",
          panel.spacing = unit(1, "cm") ) +  
   labs(title = "Box Plot of Numerical Variables by Facet Wrap")
@@ -119,10 +122,15 @@ ggplotly(p)
 
 
 ```
-### 3.3 Distribution iof Categorical Variables
+
+
+# Distribution iof Categorical Variables
 ```{R}
 categorical_vars <- c("Ship_Type", "Route_Type", "Engine_Type", 
                       "Maintenance_Status", "Weather_Condition")
+Ship <- Ship %>%
+  mutate(across(all_of(categorical_vars), as.factor))
+
 
 ship_long_cat <- Ship %>%
   pivot_longer(cols = all_of(categorical_vars), names_to = "Variable", values_to = "Category")
@@ -143,51 +151,117 @@ p_interactive <- ggplotly(p, tooltip = c("x", "y"))
 
 p_interactive
 ```
-## 4. Prepare Data for Clustering Analysis
-### 4-1. Data Cleaning
-4.1.1. Drop 'Date' variable.
+:::
+Insight: From the box plot, we can check there is no outliers existng in the data set.
+
+### Variable Relationship
+
+::: panel-tabset
+# Operational Cost(USD) vs. Engine Type
+```{R}
+ggplot(Ship, 
+       aes(x = Operational_Cost_USD, 
+           y = Engine_Type)) +
+  stat_halfeye(adjust = 0.5,
+               justification = -0.2,
+               .width = 0,
+               point_colour = NA) +
+  geom_boxplot(width = .20,
+               outlier.shape = NA) +
+  stat_dots(side = "left", 
+            justification = 1.2, 
+            binwidth = .5,
+            dotsize = 2)
+
+```
+# Operational Cost(USD) vs. Route Type
+```{R}
+ggplot(Ship, 
+       aes(x = Operational_Cost_USD, 
+           y = Weather_Condition)) +
+  stat_halfeye(adjust = 0.5,
+               justification = -0.2,
+               .width = 0,
+               point_colour = NA) +
+  geom_boxplot(width = .20,
+               outlier.shape = NA) +
+  stat_dots(side = "left", 
+            justification = 1.2, 
+            binwidth = .5,
+            dotsize = 1.5) +
+  coord_flip() +
+  theme_economist()
+```
+
+# Revnue per Voyage(USD) vs. Route Type
+```{R}
+ggplot(Ship, 
+       aes(x = Revenue_per_Voyage_USD, 
+           y = Route_Type)) +
+  stat_halfeye(adjust = 0.5,
+               justification = -0.2,
+               .width = 0,
+               point_colour = NA) +
+  geom_boxplot(width = .20,
+               outlier.shape = NA) +
+  stat_dots(side = "left", 
+            justification = 1.2, 
+            binwidth = .5,
+            dotsize = 2)
+
+```
+# Revnue per Voyage(USD) vs. Ship Type
+```{R}
+ggplot(Ship, 
+       aes(x = Revenue_per_Voyage_USD, 
+           y = Ship_Type)) +
+  stat_halfeye(adjust = 0.5,
+               justification = -0.2,
+               .width = 0,
+               point_colour = NA) +
+  geom_boxplot(width = .20,
+               outlier.shape = NA) +
+  stat_dots(side = "left", 
+            justification = 1.2, 
+            binwidth = .5,
+            dotsize = 1.5) +
+  coord_flip() +
+  theme_economist()
+```
+:::
+
+## Prepare Data for Clustering Analysis
+### Data Preparing
+
+1. Drop 'Date' variable.
 ```{R}
 #|echo: TRUE
 Ship <- Ship %>% select(-Date)
 ```
-### 4-2. Label encoding 'Maintenance_Status'
-```{R}
-#|echo: TRUE
-Ship$Maintenance_Status <- factor(Ship$Maintenance_Status, 
-                                  levels = c("None", "Good", "Fair", "Critical"), 
-                                  labels = c(0, 1, 2, 3)) 
-Ship$Maintenance_Status <- as.numeric(as.character(Ship$Maintenance_Status))  
-```
-```{R}
-#| include: false
-sum(is.na(Ship$Maintenance_Status))   
-sum(is.nan(Ship$Maintenance_Status))  
-sum(is.infinite(Ship$Maintenance_Status))  
-```
 
-### 4-3. One-hot encoding 'Engine_Type, 'Route_Type', 'Ship_Type'
+2. One-hot encoding 'Engine_Type, 'Route_Type', 'Ship_Type', 'Maintenance_Status'
 ```{R}
 #|echo: TRUE
 Ship_encoded <- dummy_cols(Ship, 
-                           select_columns = c("Engine_Type", "Route_Type", "Ship_Type", "Weather_Condition"),
+                           select_columns = c("Engine_Type", "Route_Type", "Ship_Type", "Weather_Condition", "Maintenance_Status"),
                            remove_first_dummy = TRUE, 
                            remove_selected_columns = TRUE)
 
 ```
 ```{R}
-#| include: false
+
 sum(is.na(Ship_encoded))
 sum(sapply(Ship_encoded, function(x) sum(is.nan(x))))
 sum(sapply(Ship_encoded, function(x) sum(is.infinite(x))))
 
 ```
-Check Result
+4. Check Result
 ```{R}
-#| include: false
+#| include: True
 str(Ship_encoded)  
 summary(Ship_encoded)  
 ```
-### 4-4. Perform Normalization
+5. Perform Normalization
 ```{R}
 numerical_vars <- c("Speed_Over_Ground_knots", "Engine_Power_kW", "Distance_Traveled_nm",
                     "Draft_meters", "Cargo_Weight_tons", "Operational_Cost_USD",
@@ -200,11 +274,24 @@ Ship_scaled[numerical_vars] <- scale(Ship_scaled[numerical_vars])
 ```
 
 ```{R}
-#| include: false
+
 sum(is.na(Ship_scaled))
 ```
-## 5. Perform Clustering Analysis
-### 5-1. Find appropriate K value
+## Visualising Correlation Matrix
+```{R}
+ggstatsplot::ggcorrmat(
+  data = Ship, 
+  cor.vars = 1:11,
+  ggcorrplot.args = list(outline.color = "black", 
+                         hc.order = TRUE,
+                         tl.cex = 10),
+  title    = "Correlogram for Ship dataset",
+)
+```
+
+## Perform Clustering Analysis
+
+### Find appropriate K value
 ::: panel-tabset
 # Elbow Method
 ```{R}
@@ -223,6 +310,7 @@ plot(k_values, wss_values, type = "b", pch = 19, frame = FALSE,
 ```
 # Silhouette Method
 ```{R}
+set.seed(123) 
 silhouette_score <- function(k) {
   km_result <- kmeans(Ship_scaled, centers = k, nstart = 25)
   sil <- silhouette(km_result$cluster, dist(Ship_scaled))
@@ -235,7 +323,7 @@ plot(2:10, sil_values, type = "b", pch = 19, frame = FALSE,
      xlab = "Number of Clusters K", ylab = "Average Silhouette Score",
      main = "Silhouette Method for Optimal K")
 ```
-Conclusion of 5-1: k value may be 3
+Find the best k value =3
 
 ### 5-2. Perform PCA
 
@@ -259,504 +347,223 @@ screeplot <- ggplot(data.frame(PC = 1:length(pca_result$sdev),
 
 print(screeplot)
 ```
-PCA Plot
-```{R}
 
-pca_plot <- autoplot(pca_result, data = Ship_scaled, colour = 'Maintenance_Status') +
-  theme_minimal() +
-  labs(title = "PCA Plot (PC1 vs PC2)", x = "PC1", y = "PC2")
-
-print(pca_plot)
-```
 
 ### 5-3. New Dimension-reduced dataset
+
+#### 2D
 From the PCA results, we selected the top 20 components and transformed the data into a new dimension-reduced dataset.
-```{R}
-cat('<div style="max-height: 250px; overflow-y: auto;">')
-num_pcs <- 20 
-Ship_pca_selected <- pca_result$x[, 1:num_pcs]  
-Ship_pca_df <- as.data.frame(Ship_pca_selected)
-str(Ship_pca_df) 
-summary(Ship_pca_df)  
-```
+K = 3
+We only show PC4 vs. PC5 which has better clustering effect.
 
 ```{R}
-#| include: false
-sum(is.na(Ship_pca_df))        # 計算 NA
-sum(is.nan(as.matrix(Ship_pca_df)))  # 計算 NaN（需要轉換為矩陣）
-sum(is.infinite(as.matrix(Ship_pca_df)))  # 計算 Inf
-```
-```{R}
-#| include: false
-class(Ship_pca_df)  
-str(Ship_pca_df)
-```
+library(ggplot2)
+library(plotly)        # 交互式 2D 可视化
+library(scatterplot3d) # Quarto 兼容的 3D 可视化
+library(cluster)
 
-```{R}
-#| include: false
-sum(is.na(Ship_pca_df))        # 計算 NA
-sum(is.nan(as.matrix(Ship_pca_df)))  # 計算 NaN（需要轉換為矩陣）
-sum(is.infinite(as.matrix(Ship_pca_df)))  # 計算 Inf
-```
-```{R}
-#| include: false
-sapply(Ship_pca_df, class)
-```
+pca_data <- as.data.frame(pca_result$x[, 1:20])
 
-
-### 5-4. Perform k-means clustering
-
-::: panel-tabset
-# Result
-```{R}
-#|echo: TRUE
 set.seed(123)
-kmeans_result <- kmeans(Ship_pca_df, centers = 4, nstart = 25)
-Ship_pca_df$Cluster <- as.factor(kmeans_result$cluster) 
-table(Ship_pca_df$Cluste)
-```
-# Visualize PC 1 vs.PC 2
-```{R}
 
-p <- ggplot(Ship_pca_df, aes(x = PC1, y = PC2, color = Cluster)) +
-  geom_point(alpha = 0.5, size = 2) +
-  theme_minimal() +
-  labs(title = "K-Means Clustering Visualization (PCA)",
-       x = "Principal Component 1",
-       y = "Principal Component 2") +
-  theme(legend.title = element_blank())
-
-ggplotly(p)
-```
-# Visualize PC 3 vs.PC 4
-```{R}
-p <- ggplot(Ship_pca_df, aes(x = PC3, y = PC4, color = Cluster)) +
-  geom_point(alpha = 0.5, size = 2) +  
-  theme_minimal() +
-  labs(title = "K-Means Clustering Visualization (PC3 vs PC4)",
-       x = "Principal Component 3",
-       y = "Principal Component 4") +
-  theme(legend.title = element_blank())
-
-ggplotly(p)
-```
-# Visualize PC 2 vs.PC 3
-
-```{R}
-library(plotly)
-p <- ggplot(Ship_pca_df, aes(x = PC2, y = PC3, color = Cluster)) +
-  geom_point(alpha = 0.6, size = 2) +
-  theme_minimal() +
-  labs(title = "K-Means Clustering Visualization (PC2 vs PC3)",
-       x = "Principal Component 2",
-       y = "Principal Component 3") +
-  theme(legend.title = element_blank())
-
-ggplotly(p)
-```
-# Visualize PC 4 vs.PC 5
-```{R}
-p <- ggplot(Ship_pca_df, aes(x = PC4, y = PC5, color = Cluster)) +
-  geom_point(alpha = 0.6, size = 2) +
-  theme_minimal() +
-  labs(title = "K-Means Clustering Visualization (PC4 vs PC5)",
-       x = "Principal Component 4",
+kmeans_result <- kmeans(pca_data, centers = 3, nstart = 25)
+# 2D
+pca_data$Cluster <- as.factor(kmeans_result$cluster)
+p_2d <- ggplot(pca_data, aes(x = PC4, y = PC5, color = Cluster)) + 
+  geom_point(alpha = 0.7) +
+  labs(title = "K-Means Clustering on PCA Data (K=3)", 
+       x = "Principal Component 4", 
        y = "Principal Component 5") +
-  theme(legend.title = element_blank())
+  theme_minimal()
 
-ggplotly(p)
+p_2d_plotly <- ggplotly(p_2d)
+
+p_2d_plotly
+
+# #D
+p_3d_plotly <- plot_ly(
+  data = pca_data, 
+  x = ~PC3, 
+  y = ~PC4, 
+  z = ~PC5, 
+  color = ~Cluster, 
+  colors = c("red", "blue", "green"),  # 设定不同簇的颜色
+  type = "scatter3d", 
+  mode = "markers",
+  marker = list(size = 3, opacity = 0.8)
+) %>%
+  layout(
+    title = "K-Means Clustering in 3D PCA Space",
+    scene = list(
+      xaxis = list(title = "PC3"),
+      yaxis = list(title = "PC4"),
+      zaxis = list(title = "PC5")
+    )
+  )
+
+p_3d_plotly
+
+write.csv(pca_data, "PCA_KMeans_Clusters.csv", row.names = FALSE)
 ```
 
-
-:::
-
-Conclusion from k-means visualization: PC4 vs. PC5 has better clustering effect.
+```{R}
+#| include: True
+class(pca_data)  
+str(pca_data)
+```
 
 
 Next, by PCA Loading plot, we can interpret the importance of features in reducing dimensionality while retaining essential information.
 The first 5 principal components (PCs) are selected ([, 1:5]), which means only the top five components are retained.
 
-### 5-5. PCA Loadings Plot
-
-::: panel-tabset
-# Plot table 
+### PCA Loadings Heatmap
 ```{R}
-#PCA Loadings Plot
-pca_loadings <- pca_result$rotation[, 1:5]  # 取前5個PCs
-pca_loadings_df <- as.data.frame(pca_loadings)
-print(pca_loadings_df)
+#PCA Loadings Heatmap
+
+library(ggplot2)
+library(reshape2)
+
+# K=3
+loadings_matrix <- pca_result$rotation[, 1:5]
+
+
+loadings_df <- as.data.frame(loadings_matrix)
+loadings_df$Feature <- rownames(loadings_matrix)  
+loadings_melt <- melt(loadings_df, id.vars = "Feature")  
+
+ggplot(loadings_melt, aes(x = variable, y = Feature, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
+  labs(title = "PCA Loadings Heatmap (Top 3 PCs)", 
+       x = "Principal Component", 
+       y = "Feature") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
-# PCA Loading Heat Map
+
+
+
+Next, we are going to figure out the characteristics of 3 cluster.
+
+First, calculate the mean of each cluster in PCA.
+
+
+```{R}
+
+library(dplyr)
+reconstructed_data <- as.data.frame(pca_data)
+if (!"Cluster" %in% colnames(reconstructed_data)) {
+  reconstructed_data$Cluster <- pca_data$Cluster  # 从 pca_data 复制 Cluster 列
+}
+
+
+# calculate the mean of Cluster 
+numeric_summary <- reconstructed_data %>%
+  group_by(Cluster) %>%
+  summarise(across(where(is.numeric), list(mean = mean, sd = sd), na.rm = TRUE))
+
+print(numeric_summary)
+```
+```{R}
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+
+# 确保只选择 PC1-PC20 的 mean 和 sd
+top_20_features <- numeric_summary %>%
+  select(Cluster, matches("^PC[1-9]|^PC1[0-9]|^PC20"))  # 选 PC1 到 PC20 的列
+
+# 检查列名
+print(colnames(top_20_features))
+
+# 数据变长格式（melt）
+numeric_melt <- melt(top_20_features, id.vars = "Cluster")
+
+# 分离均值和标准差
+numeric_mean <- numeric_melt[grep("_mean$", numeric_melt$variable), ]
+numeric_sd <- numeric_melt[grep("_sd$", numeric_melt$variable), ]
+
+# 修正变量名称，去掉 "_mean" 和 "_sd"
+numeric_mean$variable <- gsub("_mean", "", numeric_mean$variable)
+numeric_sd$variable <- gsub("_sd", "", numeric_sd$variable)
+
+# 画带误差条的柱状图
+ggplot(numeric_mean, aes(x = variable, y = value, fill = Cluster)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(data = numeric_sd, aes(ymin = numeric_mean$value - value, ymax = numeric_mean$value + value),
+                position = position_dodge(width = 0.9), width = 0.3) +
+  labs(title = "Cluster Numerical Features with Error Bars", x = "Feature", y = "Mean Value") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 10))
+
+
+```
 ```{R}
 library(ggplot2)
 library(reshape2)
 
-pca_loadings_df <- as.data.frame(pca_result$rotation[, 1:5])  
-pca_loadings_df$Variable <- rownames(pca_loadings_df)  
 
+pca_melt <- melt(cluster_pca_summary, id.vars = "Cluster")
 
-pca_loadings_long <- melt(pca_loadings_df, id.vars = "Variable")
-
-
-ggplot(pca_loadings_long, aes(x = variable, y = Variable, fill = value)) +
-  geom_tile() +
-  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0) +
-  theme_minimal() +
-  labs(title = "PCA Loadings Heatmap", x = "Principal Component", y = "Original Variables") +
+ggplot(pca_melt, aes(x = variable, y = value, group = Cluster, color = Cluster)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  labs(title = "Cluster Projection on PCA Axes", x = "Principal Component", y = "Mean Value") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-:::
-
-Next, we are going to perform variable importance analysis based on the PCA (Principal Component Analysis) loadings. It aims to identify the most influential variables in the dataset by analyzing their contributions across the first five principal components (PCs).
-Then we select the top 10 most contributing variables before proceeding with PCA.
-
-### 5-6. Variable importance analysis
-```{R}
-#| include: false
-var_contributions <- pca_loadings^2
-var_contributions_total <- rowSums(var_contributions)
-top_contributors <- sort(var_contributions_total, decreasing = TRUE)
-print(top_contributors)
-
-```
-The variables we select:
-
-```{R}
-top_10_vars <- names(top_contributors)[1:10]
-print(top_10_vars)
-```
-### 5-7 PCA with Selected Variables
-
-```{R}
-#| include: false
-class(Ship_encoded)
-
-```
-
-# PCA result
-```{R}
-
-selected_vars <- c("Ship_Type_Fish Carrier", "Route_Type_Long-haul", 
-                   "Route_Type_Transoceanic", "Ship_Type_Tanker", 
-                   "Engine_Type_Heavy Fuel Oil (HFO)", "Weather_Condition_Moderate", "Engine_Type_Steam Turbine", "Weather_Condition_Rough","Ship_Type_Container Ship", "Route_Type_Short-haul")
-Ship_selected <- Ship_encoded %>% select(all_of(selected_vars))
-
-Ship_scaled <- scale(Ship_selected)
-
-pca_result_new <- prcomp(Ship_scaled, center = TRUE, scale. = TRUE)
-summary(pca_result_new)
-```
-# 2D plot
-```{R}
-#| include: false
-pca_var <- data.frame(PC = 1:length(pca_result_new$sdev), 
-                      Variance = cumsum(pca_result_new$sdev^2) / sum(pca_result_new$sdev^2))
-
-ggplot(pca_var, aes(x = PC, y = Variance)) +
-  geom_point() + geom_line() +
-  labs(title = "Cumulative Variance Explained by PCA",
-       x = "Principal Component", y = "Cumulative Variance")
-
-```
-
-
-We select PC 1-5 to perform PCA 3D visualization and k means
-```{R}
-selected_pcs <- pca_result_new$x[, 1:5]  
-selected_pcs_df <- as.data.frame(selected_pcs)
-
-```
-
-```{R}
-kmeans_result <- kmeans(selected_pcs_df, centers = 5, nstart = 25)
-selected_pcs_df$Cluster <- as.factor(kmeans_result$cluster)
-```
-
-# PCA 3D visualization
-```{R}
-pca_df <- data.frame(pca_result_new$x[, 1:5])
-colnames(pca_df) <- c("PC3", "PC4", "PC5")
-
-plot_ly(pca_df, x = ~PC3, y = ~PC4, z = ~PC5, type = "scatter3d", mode = "markers")
-```
-```{R}
-#| include: false
-dim(pca_result_new$rotation[, 1:5])
-```
-```{R}
-dim(selected_pcs_df)
-head(selected_pcs_df)
-```
-
-
-### 5-8. K means result
-Check appropriate K by Silhouette Score
-```{R}
-library(cluster)
-
-for (k in 2:6) {  # 測試 K=2 到 K=6
-  kmeans_model <- kmeans(pca_df, centers = k, nstart = 25)
-  silhouette_score <- silhouette(kmeans_model$cluster, dist(pca_df))
-  avg_sil <- mean(silhouette_score[, 3])
-  print(paste("K =", k, "Silhouette Score:", avg_sil))
-}
-```
-The result show that k=5 is the best choice, so we perform k means clustering with k = 5.
-
-
-```{R}
-#| include: false
-set.seed(123)
-kmeans_result <- kmeans(pca_df[, 1:5], centers = 5, nstart = 25)
-
-pca_df$Cluster <- as.factor(kmeans_result$cluster)
-
-head(pca_df)
-```
-The plot:
-```{R}
-plot_ly(pca_df, x = ~PC3, y = ~PC4, z = ~PC5,
-        color = ~Cluster, colors = c("red", "blue", "green", "purple", "grey"),
-        type = "scatter3d", mode = "markers",
-        marker = list(size = 5)) %>%
-  layout(title = "K-Means Clustering Visualization (PC3 vs PC4 vs PC5)")
-```
-```{R}
-colnames(pca_df)
-```
-
-### 5-9. Clustering Characterize
-
-To understand the characteristics of each cluster, we need to reverse the PCA transformation to reconstruct the data and calculate the mean values of numerical variables for each cluster. Additionally, we analyze the contribution of categorical variables to each cluster, allowing us to compute the distribution of categorical variables within each cluster and visualize the results.
-
-
-5.9.1. Reverse PCA 
-```{R}
-
-selected_pcs_df <- pca_df[, c("PC3", "PC4", "PC5", "Cluster")]
-
-selected_pcs_matrix <- as.matrix(selected_pcs_df[, c("PC3", "PC4", "PC5")])
-
-
-selected_pcs_matrix <- as.matrix(selected_pcs_df[, c("PC3", "PC4", "PC5")])
-
-colnames(restored_data) <- colnames(Ship_selected)
-
-restored_data <- as.data.frame(restored_data)
-
-restored_data$Cluster <- selected_pcs_df$Cluster
-
-head(restored_data)
-dim(restored_data)
-
-```
-Calculate the mean of numerical variables:
-
-```{R}
-library(dplyr)
-
-if(!"Cluster" %in% colnames(restored_data)) {
-  stop("Error: 'Cluster' column not found in restored_data.")
-}
-
-numerical_summary <- restored_data %>%
-  group_by(Cluster) %>%
-  summarise(across(where(is.numeric), mean, na.rm = TRUE))
-
-print(numerical_summary)
-
-```
-```{R}
-sapply(restored_data, class)
-```
-```{R}
-# 確保某些變數為 factor
-restored_data <- restored_data %>%
-  mutate(across(c("Ship_Type_Fish Carrier", "Route_Type_Transoceanic", "Weather_Condition_Moderate"), as.factor))
-
-# 再次檢查類別變數
-sapply(restored_data, class)
 ```
 ```{R}
 library(dplyr)
 library(tidyr)
+library(ggplot2)
 
-# 確保 restored_data 包含 Cluster 變數
-if(!"Cluster" %in% colnames(restored_data)) {
-  stop("Error: 'Cluster' column not found in restored_data.")
-}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 
-# 確保類別變數正確轉換為 factor
-restored_data <- restored_data %>%
-  mutate(across(where(is.character), as.factor))
+# 確保變數名稱與 One-Hot 編碼的結果一致
+encoded_categorical_vars <- pca_data %>%
+    select(Cluster, starts_with("Engine_Type"), 
+                  starts_with("Route_Type"), 
+                  starts_with("Ship_Type"), 
+                  starts_with("Weather_Condition"), 
+                  starts_with("Maintenance_Status"))
 
-# 確保至少有一個類別變數
-categorical_vars <- restored_data %>% select(where(is.factor), Cluster)
-if(ncol(categorical_vars) <= 1) {
-  stop("Error: No categorical variables found in restored_data.")
-}
+# 確保數據正確
+print(colnames(encoded_categorical_vars))
 
-# 計算類別變數在每個 Cluster 內的分佈
-categorical_summary <- categorical_vars %>%
-  pivot_longer(cols = -Cluster, names_to = "Variable", values_to = "Category") %>%
-  group_by(Cluster, Variable, Category) %>%
-  summarise(Count = n(), .groups = "drop") %>%
-  group_by(Cluster, Variable) %>%
-  mutate(Percentage = Count / sum(Count) * 100)
+# 計算各類別變數的均值作為比例
+categorical_proportion <- encoded_categorical_vars %>%
+    group_by(Cluster) %>%
+    summarise(across(where(is.numeric), mean, na.rm = TRUE)) %>%
+    pivot_longer(cols = everything(), names_to = "Variable", values_to = "Proportion")
 
-# 顯示結果
-print(categorical_summary)
-```
+# 輸出數據檢查
+print(categorical_proportion)
 
+# 視覺化結果
+ggplot(categorical_proportion, aes(x = as.factor(Cluster), y = Proportion, fill = Variable)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = "Proportion of Encoded Categorical Variables in Each Cluster",
+         x = "Cluster", y = "Proportion") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          legend.position = "right")
 
-
-```{R}
-Ship$cluster <- kmeans_result$cluster
-```
-每個聚類的樣本數
-```{R}
-
-table(Ship$cluster)
-```
-```{R}
-cluster_summary <- aggregate(. ~ cluster, data = Ship, mean)
-print(cluster_summary)
-```
-```{R}
-dim(Ship)  # 確認行數和列數
-head(Ship)  # 查看前幾行數據
-table(Ship$cluster)
-```
-```{R}
-#發現maintance status有NA
-sum(is.na(Ship$Maintenance_Status))  # 計算 Maintenance_Status 中的 NA 數量
-```
-```{R}
-sum(is.na(Ship_scaled))
-```
-
-
-```{R}
-str(Ship$Maintenance_Status)
-```
-```{R}
-Ship_scaled <- scale(Ship_selected)
-pca_result <- prcomp(Ship_scaled, center = TRUE, scale. = TRUE)
-```
-
-```{R}
-sum(is.na(pca_result))
-```
-
-```{R}
-#再次進行PCA回溯並計算均值, 將降維後的PCA數據轉回原始變數空間
-# 取得 PCA 主成分的 loading matrix
-loading_matrix <- pca_result$rotation
-
-# 取得 PCA 降維後的數據
-pca_data <- pca_result$x
-
-# 反轉 PCA，回復到原始變數空間
-original_values <- pca_data %*% t(loading_matrix)
-
-# 重新調整中心化
-original_values <- scale(original_values, 
-                         center = -pca_result$center, 
-                         scale = 1 / pca_result$scale)
-```
-
-```{R}
-# 加入 KMeans 聚類結果
-Ship$Cluster <- as.factor(kmeans_result$cluster)
-```
-```{R}
-#檢查是否包含有效數據
-table(Ship$Cluster)  # 檢查各 Cluster 是否有數據
-sum(is.na(Ship$Cluster))  # 檢查是否有 NA
-```
-```{R}
-str(Ship)  # 檢查數據類型
-```
-```{R}
-#移除NA變數
-Ship <- Ship %>% select(-Maintenance_Status)  # 刪除全 NA 變數
-```
-
-```{R}
-#轉換character 為facter
-Ship <- Ship %>% mutate(across(where(is.character), as.factor))
-```
-
-```{R}
-#確保cluster是facter
-Ship$Cluster <- as.factor(Ship$Cluster)
-```
-
-```{R}
-#最後一步，計算每個cluster數值型的均值並產生表格
-#選擇數值變數計算均值
-Ship_numeric <- Ship %>% select(where(is.numeric))  # 選擇數值變數
-Ship_numeric$Cluster <- Ship$Cluster  # 加回 Cluster
-
-# 計算各 Cluster 變數均值
-cluster_summary <- aggregate(. ~ Cluster, data = Ship_numeric, mean, na.rm = TRUE)
-
-# 顯示結果
-print(cluster_summary)
 
 ```
 ```{R}
-#類別型變數對於每個cluster的提取
-# 計算每個 Cluster 內各類別變數的分佈
-ship_type_dist <- prop.table(table(Ship$Cluster, Ship$Ship_Type), margin = 1)
-route_type_dist <- prop.table(table(Ship$Cluster, Ship$Route_Type), margin = 1)
-engine_type_dist <- prop.table(table(Ship$Cluster, Ship$Engine_Type), margin = 1)
-weather_condition_dist <- prop.table(table(Ship$Cluster, Ship$Weather_Condition), margin = 1)
 
-# 顯示結果
-print("Ship Type 分佈:")
-print(ship_type_dist)
+ggplot(categorical_proportion, aes(x = as.factor(Cluster), y = Proportion, fill = Variable)) +
+  geom_bar(stat = "identity", position = "stack") +  
+  labs(title = "Proportion of Encoded Categorical Variables in Each Cluster",
+       x = "Cluster", y = "Proportion") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "right")  
 
-print("Route Type 分佈:")
-print(route_type_dist)
 
-print("Engine Type 分佈:")
-print(engine_type_dist)
-
-print("Weather Condition 分佈:")
-print(weather_condition_dist)
 ```
-```{R}
 
-# 視覺化 Ship Type 在不同 Cluster 的分佈
-ggplot(Ship, aes(x = Cluster, fill = Ship_Type)) +
-    geom_bar(position = "fill") +
-    labs(y = "Propotion", title = "Cluster vs Ship Type Distribution") +
-    theme_minimal()
-```
-```{R}
-
-# 視覺化Route Type 在不同 Cluster 的分佈
-ggplot(Ship, aes(x = Cluster, fill = Route_Type)) +
-    geom_bar(position = "fill") +
-    labs(y = "Propotion", title = "Cluster vs Ship Type Distribution")+
-    theme_minimal()
-```
-```{R}
-
-# 視覺化Engine Type 在不同 Cluster 的分佈
-ggplot(Ship, aes(x = Cluster, fill = Engine_Type)) +
-    geom_bar(position = "fill") +
-    labs(y = "Propotion", title = "Cluster vs Ship Type Distribution")+
-    theme_minimal()
-```
-```{R}
-# 視覺化Weather Condition  在不同 Cluster 的分佈
-ggplot(Ship, aes(x = Cluster, fill = Weather_Condition)) +
-    geom_bar(position = "fill") +
-    labs(y = "Propotion", title = "Cluster vs Ship Type Distribution")+
-    theme_minimal()
-```
 
 
 
