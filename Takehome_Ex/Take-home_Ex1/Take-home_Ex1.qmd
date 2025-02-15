@@ -20,8 +20,7 @@ This analysis was conducted by R Studio, leveraging various statistical and visu
 pacman::p_load(tidyverse, haven, knitr,
                patchwork, ggthemes, scales,
                ggridges, ggpubr, gganimate, ggraph,corrplot, ggstatsplot,
-              plotly, caret, fastDummies, factoextra, cluster, Rtsne, ggfortify, BiocManager, rgl, ggthemes,
-               colorspace, ggdist)
+              plotly, caret, fastDummies, factoextra, cluster, Rtsne, ggfortify, BiocManager, rgl, ggthemes, colorspace, ggdist)
 ```
 ### Data Sources
 

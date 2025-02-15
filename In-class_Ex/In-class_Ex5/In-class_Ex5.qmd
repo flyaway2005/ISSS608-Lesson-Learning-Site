@@ -1,0 +1,133 @@
+---
+title: "In-class Exercise 5"
+author: "Chang Fang Yu"
+date-modified: "last-modified"
+execute:
+  echo: True
+  eval: True
+  warning: false
+  freeze: true
+---
+```{R}
+pacman::p_load(tidyverse, readxl, SmartEDA, easystats, gtsummary, ggstateplot)
+```
+Importing Data
+```{R}
+car_resale<- read_xls("data/ToyotaCorolla.xls", "data")
+```
+
+```{R}
+summary(car_resale)
+```
+```{R}
+glimpse(car_resale)
+```
+```{R}
+list(car_resale)
+```
+
+
+Data Overview
+
+```{R}
+car_resale %>%
+  ExpData(type =1)
+```
+```{R}
+car_resale %>%
+  ExpData(type =2)
+```
+```{R}
+summary1 <- car_resale %>%
+  ExpData(type = 1)
+```
+```{R}
+colnames(car_resale)
+
+```
+
+```{R}
+col <- c("Mfg_Month", "HP_Bin", "CC_bin", "Doors", "Gears",
+         "Cylinders", "Fuel_Type", "Color", "Met_Color", "Automatic",
+         "Mfr_Guarantee", "BOVAG_Guarantee", "ABS", "Airbag_1",
+         "Airbag_2", "Airco", "Automatic_airco", "Automatic_airco", 
+         "Boardcomputer", "CD_Player", "Central_Lock", "Powered_Windows",
+         "Power_Steering", "Radio","Mistlamps", "Sport_Model", "Backseat_Divider",
+         "Metallic_Rim", "Radio_cassette", "Tow_Bar")
+car_resale <- read_xls("data/ToyotaCorolla.xls", "data") %>%
+  mutate(Id = as.character(Id)) %>%
+  mutate(across(all_of(col), as.factor))
+
+```
+```{R}
+car_resale %>%
+  ExpNumViz(target= NULL, nlim=10, Page =c(2,2))
+```
+```{R}
+car_resale %>%
+  ExpNumViz(target= "Price", nlim=10, Page =c(2,2))
+```
+
+```{R}
+model <- lm(Price ~ Age_08_04 + Mfg_Year + KM + Weight + Guarantee_Period, data = car_resale)
+model
+
+```
+### Check collinearlity of model
+```{R}
+check_c <- check_collinearity(model)
+check_c
+```
+```{R}
+check_c <- check_collinearity(model)
+plot(check_c)
+```
+### Check normality of model1
+```{R}
+model1 <- lm(Price ~ Age_08_04 + Mfg_Year + KM + Weight + Guarantee_Period, data = car_resale)
+check_normality(model1)
+```
+```{R}
+model1 <- lm(Price ~ Age_08_04 + KM + Weight + Guarantee_Period, data = car_resale)
+check_normality(model1)
+```
+### Model1
+```{R}
+model1 <- lm(Price ~ Age_08_04 + Mfg_Year + KM + Weight + Guarantee_Period, data = car_resale)
+check_collinearity(model1)
+```
+```{R}
+check_c <- check_collinearity(model1)
+plot(check_c)
+```
+
+```{R}
+tbl_regression(model1, intercept = TRUE)
+```
+```{R}
+tbl_regression(model1, intercept = TRUE) %>%
+  add_glance_source_note(
+    label = list(sigma~ "\U03C3"),
+    include = c(r.squared, adj.r.squared, AIC, statistic, p.value, sigma)
+  )
+```
+
+```{R}
+p_model1 <- parameters(model1)
+```
+
+```{R}
+plot(parameters(model1))
+```
+```{R}
+#gcoefstats(model1, output = "plot")
+
+```
+```{R}
+
+
+```
+
+
+
+

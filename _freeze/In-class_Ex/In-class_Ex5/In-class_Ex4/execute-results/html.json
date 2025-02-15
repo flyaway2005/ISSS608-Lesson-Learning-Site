@@ -1,0 +1,17 @@
+{
+  "hash": "540368c33e664d92475ce8c0e91d66ea",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"In-class exercise 4\"\nauthor: \"Chang Fang Yu\"\ndate-modified: \"last-modified\"\nexecute:\n  echo: True\n  eval: True\n  warning: false\n  freeze: true\n---\n\n\n\n\n\n## Getting Started\n\n### Installing and loading the required libraies\n\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\npacman::p_load(haven, SmartEDA, tidymodels, ggstatsplot, tidyverse) \n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\n#| message: false\n#| warning: false\nexam_data <- read_csv(\"data/Exam_data.csv\")\n```\n:::\n\n::: {.cell}\n::: {.cell-output-display}\n![](In-class_Ex4_files/figure-html/unnamed-chunk-3-1.png){width=672}\n:::\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nggscatterstats(\n  data = exam_data,\n  x = MATHS,\n  y = ENGLISH,\n  marginal = TRUE,\n  )\n```\n\n::: {.cell-output-display}\n![](In-class_Ex4_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nggbetweenstats(\n  data = exam_data,\n  x = RACE, \n  y = ENGLISH,\n  type = \"p\",\n  mean.ci = TRUE, \n  pairwise.comparisons = FALSE, \n  pairwise.display = \"s\",\n  p.adjust.method = \"fdr\",\n  messages = FALSE\n)\n```\n\n::: {.cell-output-display}\n![](In-class_Ex4_files/figure-html/unnamed-chunk-5-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "In-class_Ex4_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
