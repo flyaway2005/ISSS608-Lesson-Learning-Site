@@ -9,7 +9,7 @@ execute:
   freeze: true
 ---
 ```{R}
-pacman::p_load(tidyverse, readxl, SmartEDA, easystats, gtsummary, ggstateplot)
+pacman::p_load(tidyverse, readxl, SmartEDA, easystats, gtsummary, ggstatsplot)
 ```
 Importing Data
 ```{R}
@@ -120,7 +120,7 @@ p_model1 <- parameters(model1)
 plot(parameters(model1))
 ```
 ```{R}
-#gcoefstats(model1, output = "plot")
+ggcoefstats(model1, output = "plot")
 
 ```
 ```{R}
