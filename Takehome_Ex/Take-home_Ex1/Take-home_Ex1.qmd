@@ -220,8 +220,6 @@ ggplot(Ship, aes(x = Operational_Cost_USD, y = Route_Type)) +
   theme_economist()  
 ```
 
-The route type with the highest median operational cost is Transoceanic.
-
 # Ship Type
 
 ```{R}
@@ -271,13 +269,9 @@ ggplot(Ship, aes(x = Operational_Cost_USD, y = Weather_Condition)) +
 ```
 :::
 
-Observation:
+**Observation:**
 
-Overall, operational costs do not vary significantly across different engine types, route types, ship types, and weather conditions.
-Diesel has the most concentrated distribution of operational costs.
-The route type with the highest median operational cost is Transoceanic.
-Among different weather conditions, None (possibly representing a mixed weather type) has the highest operational cost.
-
+Overall, operational costs do not vary significantly across different engine types, route types, ship types, and weather conditions. Diesel has the most concentrated distribution of operational costs. The route type with the highest median operational cost is Transoceanic. Among different weather conditions, None (possibly representing a mixed weather type) has the highest operational cost.
 
 ::: panel-tabset
 # Engine Type Vs Efficiency nm per kwh
@@ -371,7 +365,7 @@ sum(sapply(Ship_encoded, function(x) sum(is.infinite(x))))
 ```{R}
 #| include: True
 str(Ship_encoded)  
-summary(Ship_encoded)  
+
 ```
 
 5.  **Perform Normalization**
@@ -493,7 +487,7 @@ From the PCA results and the Scree Plot, we can see that the cumulative variance
 
 ### Perform Clustering Analysis
 
-From the PCA results, we selected the top 20 components and transformed the data into a new dimension-reduced dataset. When K = 3 PC 4 and PC5 show the best clsuterign result. Hence We only show PC4 vs. PC5 2D plot and PC3, PC4, PC5 3D plot.
+From the PCA results, we selected the top 20 components and transformed the data into a new dimension-reduced dataset. When K = 3 PC 4 and PC5 show the best clsutering result. Hence We only show PC4 vs. PC5 2D plot and (PC3, PC4, PC5) 3D plot.
 
 ```{R}
 #| echo: False
@@ -556,9 +550,6 @@ Next, by PCA Loading plot, we can interpret the importance of features in reduci
 ```{R}
 #| echo: False
 #PCA Loadings Heatmap
-
-library(ggplot2)
-library(reshape2)
 
 # K=3
 loadings_matrix <- pca_result$rotation[, 1:5]
@@ -756,45 +747,41 @@ Key observation:
 
 1.  Engine Type Distribution Across Clusters
 
--   Cluster 1 (Left Bar) has a high proportion of Engine_Type_None and Engine_Type_Steam Turbine, meaning that this cluster consists of ships that either do not have a specified engine type or use steam turbines.
+-   Cluster 1 has a high proportion of Engine_Type_None
 
--   Cluster 3 (Right Bar) has a significant proportion of Engine_Type_Heavy Fuel Oil (HFO), suggesting that this cluster may consist of ships that rely on high fuel consumption engines.
+-   Cluster 2 has a significant proportion of Engine_Type_Heavy Fuel Oil (HFO) and Engine_Type_Steam Turbine, while cluster 3 has more proportion of Engine_Type_Steam Turbine than Engine_Type_Heavy Fuel Oil (HFO).
 
 2\. Maintenance Status Differences
 
--   Cluster 1 and Cluster 2 (Left and Middle Bars) contain a mix of Maintenance_Status_Fair and Maintenance_Status_Good.
-
--   Cluster 3 (Right Bar) has a relatively higher proportion of Maintenance_Status_None, indicating that some ships in this cluster may have poor or undefined maintenance records.
+-   All three clusters have an even distribution across the tree maintenance status.
 
 3\. Route Type Variations
 
--   Cluster 1 and Cluster 3 have a significant share of Route_Type_Long-haul and Route_Type_Transoceanic, suggesting that these clusters may consist of ships operating on long-distance routes.
-
--   Cluster 2 (Middle Bar) has a larger proportion of Route_Type_Short-haul, indicating that this group consists mainly of short-haul ships.
+-   All three clusters have an even distribution across the four route types.
 
 4\. Ship Type Distribution
 
--   Cluster 3 (Right Bar) has a higher proportion of Ship_Type_Tanker and Ship_Type_None, suggesting more oil tankers or undefined ship types in this cluster.
+-   Cluster 1, 2 has a higher proportion of Ship_Type_Tanker and Ship_Type_Fish Carrier
 
--   Cluster 1 and Cluster 2 have more Ship_Type_Container Ship and Ship_Type_Fish Carrier, suggesting a focus on cargo and fishing ships.
+-   Cluster 3 have more Ship_Type_Carrier suggesting a focus on cargo and fishing ships.
 
 5\. Weather Conditions
 
--   Cluster 1 and Cluster 2 have a more balanced mix of Weather_Condition_Moderate and Weather_Condition_None.
+-   Cluster 1 and Cluster 2 have a more balanced mix of Weather_Condition_Moderate and Weather_Condition_Rough.
 
--   Cluster 3 has a higher proportion of Weather_Condition_Rough, indicating that this group might operate in areas with rougher weather conditions.
+-   Cluster 3 has a higher proportion of Weather_Condition_None.
 
 ## Summary and Conclusion
 
-This analysis categorizes ships into three clusters based on operational cost, efficiency, cargo capacity, route type, maintenance status, and weather impact. Cluster 1 (Red) consists of ships with high operational costs and low efficiency. These ships primarily use steam turbine engines and operate on long transoceanic routes, resulting in high fuel consumption and low revenue per voyage. Their speed is generally lower, and they have a significant proportion of Engine_Type_Steam Turbine and Route_Type_Transoceanic. While their maintenance status is fair, their high costs make them less efficient.
+The clustering analysis reveals three distinct fleet segments, each with unique operational characteristics.
 
-Cluster 2 (Blue) includes short-haul ships with lower cargo capacity and voyage frequency. These vessels often operate in harsh weather conditions, affecting their operational efficiency. The cluster has a higher presence of ferries, small transport vessels, and specialized ships designed for challenging environments such as polar regions or storm-prone areas. Maintenance status in this cluster is generally fair to good, but the overall utilization rate is lower compared to other clusters.
+Cluster 1 (Red) consists of older, high-cost vessels, primarily utilizing steam turbine engines and operating on transoceanic routes. These ships exhibit low operational efficiency, with high fuel consumption, lower speeds, and reduced revenue per voyage. They also have a higher proportion of tankers and fish carriers, indicating their primary role in transporting bulk goods or specific cargo types. Despite being evenly distributed across maintenance statuses, these vessels likely require modernization or fuel optimization to remain competitive.
 
-Cluster 3 (Green) represents high-efficiency, high-revenue ships that primarily operate on long-haul routes. These ships cover longer distances per voyage and generate higher revenue. They tend to have stronger engine power and higher speeds, making them well-suited for optimal operational performance. The cluster contains a higher proportion of heavy fuel oil (HFO) engines and tankers, which suggests that these vessels rely on high fuel consumption engines. Additionally, some ships in this cluster have poor or undefined maintenance records.
+Cluster 2 (Blue) represents short-haul vessels that operate with low cargo weight and lower voyage frequency, often navigating harsh weather conditions. These ships frequently use heavy fuel oil (HFO) or steam turbine engines, suggesting potential cost inefficiencies due to fuel consumption. Their balanced mix of moderate and rough weather conditions implies they operate in challenging environments, possibly coastal regions or storm-prone areas. With a significant proportion of tankers and fish carriers, these vessels may serve niche markets but face profitability challenges due to lower utilization rates.
 
-The categorical feature analysis highlights key differences across clusters, particularly in engine type, maintenance status, route type, ship type, and weather conditions. Cluster 1 and Cluster 3 are dominated by long-haul and transoceanic routes, whereas Cluster 2 mainly consists of short-haul ships. In terms of maintenance, Cluster 1 and Cluster 2 have a mix of fair and good maintenance statuses, while Cluster 3 has a higher proportion of ships with no recorded maintenance. Cluster 3 also contains more tankers and undefined ship types, while Clusters 1 and 2 are mainly composed of container ships and fishing carriers. Weather conditions further differentiate the clusters, with Cluster 3 operating more frequently in rough weather conditions, while Clusters 1 and 2 navigate through more moderate environments.
+Cluster 3 (Green) includes modern, high-efficiency cargo ships designed for long-haul operations, covering greater distances at higher speeds. These vessels generate high revenue per voyage, supported by strong engine power and well-maintained conditions. With a higher proportion of cargo carriers, this cluster is optimized for large-scale transport, making it the most cost-effective fleet segment. They also tend to operate in calmer weather conditions, reducing operational risks.
 
-This analysis provides a comprehensive understanding of the different clusters, illustrating how key characteristics such as operational cost, efficiency, and environmental factors influence ship classification. The results help identify trends in fleet performance and provide insights into how different ship groups function within various operational conditions.
+Across all clusters, route types and maintenance statuses are evenly distributed, ensuring no specific segment dominates a particular operational category. However, Cluster 1 and Cluster 2 contain more tankers and fish carriers, whereas Cluster 3 is dominated by cargo carriers, reinforcing its role in efficient, high-revenue transport. These insights highlight the need for modernization in Cluster 1, risk mitigation strategies in Cluster 2, and potential expansion opportunities for the efficient vessels in Cluster 3.
 
 ## References
 
