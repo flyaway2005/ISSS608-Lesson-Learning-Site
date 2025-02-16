@@ -3,71 +3,70 @@ title: "Take-home Exercise 1"
 author: "Chang Fang Yu"
 date-modified: "last-modified"
 execute:
-  echo: False
+  echo: True
   eval: True
   warning: false
   freeze: true
+format:
+  html:
+    css: styles.css
 ---
+
 # Ship Performace Clustering Analysis
 
-##  Overview
-In this exercise, we are going to utilize The Ship Performance Clustering Dataset to perform a clustering analysis. This dataset comproses numerical and categorical features representing different ship types, operational characteristics and other facters, enabling the segmentation of vessels based on key performance metrics, providing insights into their efficiency, cost-effectiveness and operational behaviors.
+## Overview
+
+In this exercise, we are going to utilize the Ship Performance Clustering Dataset to perform a clustering analysis. This dataset comproses numerical and categorical features representing different ship types, operational characteristics and other facters, enabling the segmentation of vessels based on key performance metrics, providing insights into their efficiency, cost-effectiveness and operational behaviors.
 
 ### Methodology and Tools
+
 This analysis was conducted by R Studio, leveraging various statistical and visualization packages to facilitate data preprocessing, clustering, and result interpretation. The following R packages were employed:
+
 ```{R}
-#|echo: TRUE
+
 pacman::p_load(tidyverse, haven, knitr,
                patchwork, ggthemes, scales,
                ggridges, ggpubr, gganimate, ggraph,corrplot, ggstatsplot,
               plotly, caret, fastDummies, factoextra, cluster, Rtsne, ggfortify, BiocManager, rgl, ggthemes, colorspace, ggdist)
 ```
+
 ### Data Sources
 
 [The Ship Performance Clustering](https://www.kaggle.com/datasets/jeleeladekunlefijabi/ship-performance-clustering-dataset/data)
-
 
 ## Data Pre-processing
 
 ```{R}
 Ship <- read_csv("data/Ship_Performance_Dataset.csv")
 ```
-### 2-1. Data First Glimpse by Glimpse() and Datatable
-Glimpse() shows it consists of 2736 rows and 18 columns, including 1 date type, 5 categorical type, and 12 numerical type. 
-By Datatable, We can check the detail of the dataset.
+
+### Data First Glimpse by Glimpse() and Datatable
+
+Glimpse() shows it consists of 2736 rows and 18 columns, including 1 date type, 5 categorical type, and 12 numerical type. By Datatable, We can check the detail of the dataset.
 
 ::: panel-tabset
+# Glimpse
 
-#Glimpse
 ```{R}
-#|echo: TRUE
-cat('<div style="max-height: 200px; overflow-y: auto;">')
 glimpse(Ship)
-cat('</div>')
+
 ```
+
 # Datatable
 
 ```{R}
-cat('<div style="max-height: 200px; overflow-y: auto;">')
+
 DT::datatable(Ship, class= "compact")
 ```
 :::
-### Data Sanity Check 
-Checking for Duplicates and Missing Values
-Duplicates
-```{R}
-Ship[duplicated(Ship),]
-```
-Missing Values
-```{R}
-sum(is.na(Ship))
-```
+
 ## Exploratory Data Analysis(EDA)
 
 ::: panel-tabset
-
 # The Distribution of Numerical Variables
+
 ```{R}
+#| echo: False
 numerical_vars <- c("Speed_Over_Ground_knots", "Distance_Traveled_nm",
                     "Draft_meters", "Cargo_Weight_tons", "Turnaround_Time_hours", "Efficiency_nm_per_kWh","Seasonal_Impact_Score", "Weekly_Voyage_Count", "Average_Load_Percentage", "Engine_Power_kW", "Operational_Cost_USD", "Revenue_per_Voyage_USD" )
 
@@ -80,14 +79,15 @@ ship_long_num <- Ship %>%
   pivot_longer(cols = all_of(numerical_vars), names_to = "Variable", values_to = "Value")
 
 p <- ggplot(ship_long_num, aes(x = Value, fill = Variable)) +
-  geom_histogram(alpha = 0.5, bins = 30, color = "black") +
+  geom_histogram(alpha = 0.5, bins = 30, color = "black", size = 0.2) +
   facet_wrap(~ Variable, scales = "free", ncol = 3) + 
   theme_minimal() +
   theme(
     plot.margin = margin(10, 10, 30, 10),
-    axis.text.x = element_blank(),  # 隱藏 x 軸標籤
+    axis.text.x = element_blank(),  
     legend.text = element_text(size = 7),
-    panel.spacing = unit(2, "cm")
+    panel.spacing = unit(2, "cm"),
+    strip.text = element_text(size = 10, margin = margin(b = 4, t = 12))
   ) +
   labs(title = "Histogram of Numeric Variables")
 
@@ -96,35 +96,43 @@ interactive_p <- ggplotly(p)
 
 interactive_p
 ```
+
 # Box Plot of Numerical Variables
 
 ```{R}
-
+#| echo: False
 numerical_vars_1 <- c("Speed_Over_Ground_knots", "Engine_Power_kW", "Distance_Traveled_nm", 
-                    "Cargo_Weight_tons", "Operational_Cost_USD", "Revenue_per_Voyage_USD", "Turnaround_Time_hours", "Efficiency_nm_per_kWh", "Seasonal_Impact_Score",
-                    "Weekly_Voyage_Count", "Average_Load_Percentage")
+                      "Cargo_Weight_tons", "Operational_Cost_USD", "Revenue_per_Voyage_USD", 
+                      "Turnaround_Time_hours", "Efficiency_nm_per_kWh", "Seasonal_Impact_Score",
+                      "Weekly_Voyage_Count", "Average_Load_Percentage")
 
-ship_long <- Ship %>%
+Ship_scaled <- Ship %>%
+  mutate(across(all_of(numerical_vars_1), scale))  
+
+
+ship_long_scaled <- Ship_scaled %>%
   pivot_longer(cols = all_of(numerical_vars_1), names_to = "Variable", values_to = "Value")
 
-p <- ggplot(ship_long, aes(x = Variable, y = Value, fill = Variable)) +
-  geom_boxplot(outlier.color = "red", outlier.size = 5) +
-  facet_wrap(~ Variable, scales = "free", ncol = 3) +  
+
+p <- ggplot(ship_long_scaled, aes(x = Variable, y = Value, fill = Variable)) +
+  geom_boxplot(outlier.color = "red", outlier.size = 2) +  
   theme_minimal() +
-  theme(axis.text.x = element_text(hjust = 1, size = 5),  
-         
-        legend.position = "bottom",
-         panel.spacing = unit(1, "cm") ) +  
-  labs(title = "Box Plot of Numerical Variables by Facet Wrap")
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),  
+        legend.position = "none") +  
+  labs(title = "Standardized Box Plot of Numerical Variables",
+       x = "Variable", 
+       y = "Standardized Value (Z-score)")
+
 
 ggplotly(p)
 
 
 ```
 
+# Distribution of Categorical Variables
 
-# Distribution iof Categorical Variables
 ```{R}
+#| echo: False
 categorical_vars <- c("Ship_Type", "Route_Type", "Engine_Type", 
                       "Maintenance_Status", "Weather_Condition")
 Ship <- Ship %>%
@@ -151,149 +159,318 @@ p_interactive <- ggplotly(p, tooltip = c("x", "y"))
 p_interactive
 ```
 :::
-Insight: From the box plot, we can check there is no outliers existng in the data set.
+
+Observation: 
+The analysis of numerical variables through histograms and standardized box plots reveals key patterns in data distribution and variability. Most variables exhibit consistent dispersion after standardization, suggesting a well-balanced dataset. However, Weekly_Voyage_Count shows a discrete pattern, indicating specific count categories rather than a continuous spread. Variables such as Operational_Cost_USD and Revenue_per_Voyage_USD demonstrate high natural variance, which may impact business insights. Notably, the standardized box plot confirms the absence of extreme outliers, ensuring that no single variable disproportionately skews the dataset. These insights highlight a dataset that is well-structured, with stable numerical distributions.
+
+In terms of the categorical variables, they are well-distributed with minimal missing data. Diesel, HFO, and Steam Turbine dominate engine types, while maintenance status is balanced across "Critical," "Fair," and "Good." Route and ship types are diverse, with Tankers and Bulk Carriers being more frequent. Weather conditions are mainly "Calm," "Moderate," or "Rough." This ensures a well-structured dataset for analysis.
+
+Overall, the dataset is well-balanced, with stable numerical distributions and diverse categorical attributes, making it suitable for K-Means clustering analysis. The well-spread numerical features and natural variability provide a strong foundation for identifying meaningful clusters in operational performance, travel patterns, and maintenance risk levels.
+
 
 ### Variable Relationship
 
+#### Operational Cost(USD) vs. Different Catagorical Variables
+
 ::: panel-tabset
-# Operational Cost(USD) vs. Engine Type
-```{R}
-ggplot(Ship, 
-       aes(x = Operational_Cost_USD, 
-           y = Engine_Type)) +
-  stat_halfeye(adjust = 0.5,
-               justification = -0.2,
-               .width = 0,
-               point_colour = NA) +
-  geom_boxplot(width = .20,
-               outlier.shape = NA) +
-  stat_dots(side = "left", 
-            justification = 1.2, 
-            binwidth = .5,
-            dotsize = 2)
+# Engine Type
 
-```
-# Operational Cost(USD) vs. Route Type
 ```{R}
-ggplot(Ship, 
-       aes(x = Operational_Cost_USD, 
-           y = Weather_Condition)) +
-  stat_halfeye(adjust = 0.5,
-               justification = -0.2,
-               .width = 0,
-               point_colour = NA) +
-  geom_boxplot(width = .20,
-               outlier.shape = NA) +
-  stat_dots(side = "left", 
-            justification = 1.2, 
-            binwidth = .5,
-            dotsize = 1.5) +
-  coord_flip() +
+#| echo: False
+ggplot(Ship, aes(x = Operational_Cost_USD, y = Engine_Type)) +
+  
+
+  stat_halfeye(
+    adjust = 0.5,
+    justification = -0.2, 
+    .width = 0.1,
+    point_colour = NA
+  ) +
+ 
+  geom_boxplot(
+    width = 0.15, 
+    outlier.shape = NA,
+    position = position_nudge(x = 0) 
+  ) +
+  
+  coord_flip() +  
   theme_economist()
+
+```
+Observation: 
+The cost range for all engine types is generally similar, ranging from \$0 to \$500,000. The whisker lengths of the box plots are also comparable, indicating that the gap between the lowest and highest operational costs remains relatively consistent. Additionally, the median cost is close to \$250,000.
+
+Diesel and HFO engines have a relatively smaller IQR, suggesting that their operational costs are more stable. In contrast, Steam Turbine has a more dispersed density distribution, indicating that its operational costs may be influenced by a greater number of factors.
+
+The density plot suggests that Steam Turbine may exhibit higher cost variability compared to other engine types.
+
+# Route Type
+
+```{R}
+#| echo: False
+ggplot(Ship, aes(x = Operational_Cost_USD, y = Route_Type)) +
+  
+
+  stat_halfeye(
+    adjust = 0.5,
+    justification = -0.2, 
+    .width = 0.1,
+    point_colour = NA
+  ) +
+ 
+  geom_boxplot(
+    width = 0.15, 
+    outlier.shape = NA,
+    position = position_nudge(x = 0) 
+  ) +
+  
+  coord_flip() +  
+  theme_economist()  
 ```
 
-# Revnue per Voyage(USD) vs. Route Type
+The route type with the highest median operational cost is Transoceanic.
+
+# Ship Type
+
 ```{R}
-ggplot(Ship, 
-       aes(x = Revenue_per_Voyage_USD, 
+#| echo: False
+ggplot(Ship, aes(x = Operational_Cost_USD, y = Ship_Type)) +
+  
+
+  stat_halfeye(
+    adjust = 0.5,
+    justification = -0.2, 
+    .width = 0.1,
+    point_colour = NA
+  ) +
+ 
+  geom_boxplot(
+    width = 0.15, 
+    outlier.shape = NA,
+    position = position_nudge(x = 0) 
+  ) +
+  
+  coord_flip() +  
+  theme_economist()  
+```
+
+# Weather Condition
+
+```{R}
+#| echo: False
+ggplot(Ship, aes(x = Operational_Cost_USD, y = Weather_Condition)) +
+  
+
+  stat_halfeye(
+    adjust = 0.5,
+    justification = -0.2, 
+    .width = 0.1,
+    point_colour = NA
+  ) +
+ 
+  geom_boxplot(
+    width = 0.15, 
+    outlier.shape = NA,
+    position = position_nudge(x = 0) 
+  ) +
+  
+  coord_flip() +  
+  theme_economist()  
+```
+:::
+
+Observation: 
+Operational costs show noticeable variation across different factors. Diesel and HFO engines exhibit a wider cost distribution, while steam turbines have a more concentrated range. Additionally, long-haul routes and rough weather conditions are linked to higher operational expenses, indicating external environmental influences on cost.
+
+#### Revenue per Voyage(USD) vs. Different Catagorical Variables
+
+::: panel-tabset
+# Route Type
+
+```{R}
+#| echo: False
+ggplot(Ship, aes(x = Revenue_per_Voyage_USD, 
            y = Route_Type)) +
-  stat_halfeye(adjust = 0.5,
-               justification = -0.2,
-               .width = 0,
-               point_colour = NA) +
-  geom_boxplot(width = .20,
-               outlier.shape = NA) +
-  stat_dots(side = "left", 
-            justification = 1.2, 
-            binwidth = .5,
-            dotsize = 2)
+  
 
+  stat_halfeye(
+    adjust = 0.5,
+    justification = -0.2, 
+    .width = 0.1,
+    point_colour = NA
+  ) +
+ 
+  geom_boxplot(
+    width = 0.15, 
+    outlier.shape = NA,
+    position = position_nudge(x = 0) 
+  ) +
+  
+  coord_flip() +  
+  theme_economist()  
 ```
-# Revnue per Voyage(USD) vs. Ship Type
+
+# Ship Type
+
 ```{R}
-ggplot(Ship, 
-       aes(x = Revenue_per_Voyage_USD, 
+#| echo: False
+ggplot(Ship, aes(x = Revenue_per_Voyage_USD, 
            y = Ship_Type)) +
-  stat_halfeye(adjust = 0.5,
-               justification = -0.2,
-               .width = 0,
-               point_colour = NA) +
-  geom_boxplot(width = .20,
-               outlier.shape = NA) +
-  stat_dots(side = "left", 
-            justification = 1.2, 
-            binwidth = .5,
-            dotsize = 1.5) +
-  coord_flip() +
-  theme_economist()
+  
+
+  stat_halfeye(
+    adjust = 0.5,
+    justification = -0.2, 
+    .width = 0.1,
+    point_colour = NA
+  ) +
+ 
+  geom_boxplot(
+    width = 0.15, 
+    outlier.shape = NA,
+    position = position_nudge(x = 0) 
+  ) +
+  
+  coord_flip() +  
+  theme_economist()  
+```
+
+# Engine Type
+
+```{R}
+#| echo: False
+ggplot(Ship, aes(x = Revenue_per_Voyage_USD, 
+           y = Engine_Type)) +
+  
+
+  stat_halfeye(
+    adjust = 0.5,
+    justification = -0.2, 
+    .width = 0.1,
+    point_colour = NA
+  ) +
+ 
+  geom_boxplot(
+    width = 0.15, 
+    outlier.shape = NA,
+    position = position_nudge(x = 0) 
+  ) +
+  
+  coord_flip() +  
+  theme_economist()  
+```
+
+# Weather Condition
+
+```{R}
+#| echo: False
+ggplot(Ship, aes(x = Revenue_per_Voyage_USD, 
+           y = Weather_Condition)) +
+  
+
+  stat_halfeye(
+    adjust = 0.5,
+    justification = -0.2, 
+    .width = 0.1,
+    point_colour = NA
+  ) +
+ 
+  geom_boxplot(
+    width = 0.15, 
+    outlier.shape = NA,
+    position = position_nudge(x = 0) 
+  ) +
+  
+  coord_flip() +  
+  theme_economist()  
 ```
 :::
 
 ## Prepare Data for Clustering Analysis
+
 ### Data Preparing
 
-1. Drop 'Date' variable.
+1.  Drop 'Date' variable.
+
 ```{R}
-#|echo: TRUE
+#| include: False
 Ship <- Ship %>% select(-Date)
 ```
 
-2. One-hot encoding 'Engine_Type, 'Route_Type', 'Ship_Type', 'Maintenance_Status'
+2.  One-hot encoding 'Engine_Type, 'Route_Type', 'Ship_Type', 'Maintenance_Status'
+
 ```{R}
-#|echo: TRUE
+
+#| include: False
 Ship_encoded <- dummy_cols(Ship, 
                            select_columns = c("Engine_Type", "Route_Type", "Ship_Type", "Weather_Condition", "Maintenance_Status"),
                            remove_first_dummy = TRUE, 
                            remove_selected_columns = TRUE)
 
 ```
-```{R}
 
+```{R}
+#| include: False
 sum(is.na(Ship_encoded))
 sum(sapply(Ship_encoded, function(x) sum(is.nan(x))))
 sum(sapply(Ship_encoded, function(x) sum(is.infinite(x))))
 
 ```
-4. Check Result
+
+4.  Check Result
+
 ```{R}
 #| include: True
 str(Ship_encoded)  
 summary(Ship_encoded)  
 ```
-5. Perform Normalization
+
+5.  Perform Normalization
+
 ```{R}
 numerical_vars <- c("Speed_Over_Ground_knots", "Engine_Power_kW", "Distance_Traveled_nm",
                     "Draft_meters", "Cargo_Weight_tons", "Operational_Cost_USD",
                     "Revenue_per_Voyage_USD", "Turnaround_Time_hours", "Efficiency_nm_per_kWh",
                     "Seasonal_Impact_Score", "Weekly_Voyage_Count", "Average_Load_Percentage")
-
 Ship_scaled <- Ship_encoded 
 
 Ship_scaled[numerical_vars] <- scale(Ship_scaled[numerical_vars])
 ```
 
 ```{R}
+#| include: False
 
 sum(is.na(Ship_scaled))
 ```
-## Visualising Correlation Matrix
+
+### Visualising Correlation Matrix
+
 ```{R}
+#| echo: False
 ggstatsplot::ggcorrmat(
-  data = Ship, 
-  cor.vars = 1:11,
-  ggcorrplot.args = list(outline.color = "black", 
-                         hc.order = TRUE,
-                         tl.cex = 10),
-  title    = "Correlogram for Ship dataset",
+  data = Ship,
+  cor.vars = c("Speed_Over_Ground_knots", "Engine_Power_kW", "Distance_Traveled_nm", 
+               "Draft_meters", "Cargo_Weight_tons", "Operational_Cost_USD", 
+               "Revenue_per_Voyage_USD", "Turnaround_Time_hours", "Efficiency_nm_per_kWh", 
+               "Seasonal_Impact_Score", "Weekly_Voyage_Count", "Average_Load_Percentage"),
+  ggcorrplot.args = list(outline.color = "black",
+                          hc.order = TRUE,
+                          tl.cex = 10),
+  title = "Correlogram for Ship dataset"
 )
 ```
+Observation: 
+From the correlogram, we can see that there is almost no significant linear relationship between the variables.Thus, We need to perform Z-standardization and use PCA for dimensionality reduction to improve clustering effectiveness. Additionally, the Silhouette Score should be used to determine the optimal value of K.
 
 ## Perform Clustering Analysis
 
 ### Find appropriate K value
+
 ::: panel-tabset
 # Elbow Method
+
 ```{R}
+#| echo: False
 set.seed(123) 
 
 wss <- function(k) {
@@ -307,8 +484,11 @@ plot(k_values, wss_values, type = "b", pch = 19, frame = FALSE,
      xlab = "Number of Clusters K", ylab = "Total Within Sum of Squares",
      main = "Elbow Method for Optimal K")
 ```
+
 # Silhouette Method
+
 ```{R}
+#| echo: False
 set.seed(123) 
 silhouette_score <- function(k) {
   km_result <- kmeans(Ship_scaled, centers = k, nstart = 25)
@@ -324,12 +504,14 @@ plot(2:10, sil_values, type = "b", pch = 19, frame = FALSE,
 ```
 :::
 
-Find the best k value =3
+Based on the Silhouette Method, the optimal number of clusters (K) is determined to be 3. This is identified as the value where the Silhouette Score is relatively higher compared to other K values, indicating better-defined clusters. While K=2 has the highest score, the next best local maximum occurs at K=3, making it a balanced choice for clustering.
+
+Therefore, K=3 is recommended for the clustering analysis, ensuring a good trade-off between cluster compactness and separation.
 
 ### Perform PCA
 
-Result
 ```{R}
+#| echo: False
 
 Ship_numeric <- Ship_scaled %>% select_if(is.numeric)
 
@@ -337,8 +519,11 @@ pca_result <- prcomp(Ship_numeric, center = TRUE, scale. = TRUE)
 
 summary(pca_result)
 ```
+
 Screeplot
+
 ```{R}
+#| echo: False
 screeplot <- ggplot(data.frame(PC = 1:length(pca_result$sdev),
                                Variance = cumsum(pca_result$sdev^2 / sum(pca_result$sdev^2))),
                     aes(x = PC, y = Variance)) +
@@ -347,18 +532,21 @@ screeplot <- ggplot(data.frame(PC = 1:length(pca_result$sdev),
   theme_minimal()
 
 print(screeplot)
-```
 
+
+```
+Observation: 
+From the PCA results and the Scree Plot, we can see that the cumulative variance explained by the first 20 principal components reaches 80.7%. However, the variance explained by each individual principal component is not very high. To reduce dimensionality while retaining the key information, we select only the first 20 principal components for analysis.
 
 ### Perform Clustering Analysis
-From the PCA results, we selected the top 20 components and transformed the data into a new dimension-reduced dataset.
-K = 3
-We only show PC4 vs. PC5 which has better clustering effect.
+
+From the PCA results, we selected the top 20 components and transformed the data into a new dimension-reduced dataset. When K = 3 PC 4 and PC5 show the best clsuterign result. Hence We only show PC4 vs. PC5 2D plot and PC3, PC4, PC5 3D plot.
 
 ```{R}
+#| echo: False
 library(ggplot2)
-library(plotly)        # 交互式 2D 可视化
-library(scatterplot3d) # Quarto 兼容的 3D 可视化
+library(plotly)       
+library(scatterplot3d) 
 library(cluster)
 
 pca_data <- as.data.frame(pca_result$x[, 1:20])
@@ -406,17 +594,18 @@ write.csv(pca_data, "PCA_KMeans_Clusters.csv", row.names = FALSE)
 ```
 
 ```{R}
-#| include: True
+#| echo: False
+#| include: False
 class(pca_data)  
 str(pca_data)
 ```
 
-
-Next, by PCA Loading plot, we can interpret the importance of features in reducing dimensionality while retaining essential information.
-The first 5 principal components (PCs) are selected ([, 1:5]), which means only the top five components are retained.
+Next, by PCA Loading plot, we can interpret the importance of features in reducing dimensionality while retaining essential information. The first 5 principal components (PCs) are selected (\[, 1:5\]), which means only the top five components are retained.
 
 ### PCA Loadings Heatmap
+
 ```{R}
+#| echo: False
 #PCA Loadings Heatmap
 
 library(ggplot2)
@@ -433,7 +622,7 @@ loadings_melt <- melt(loadings_df, id.vars = "Feature")
 ggplot(loadings_melt, aes(x = variable, y = Feature, fill = value)) +
   geom_tile() +
   scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
-  labs(title = "PCA Loadings Heatmap (Top 3 PCs)", 
+  labs(title = "PCA Loadings Heatmap (Top 5 PCs)", 
        x = "Principal Component", 
        y = "Feature") +
   theme_minimal() +
@@ -441,14 +630,81 @@ ggplot(loadings_melt, aes(x = variable, y = Feature, fill = value)) +
 
 ```
 
+Through the PCA Loadings Heatmap, we identified the key variables that significantly impact PC3, PC4, and PC5. Then, by comparing with the 3D clustering results, we determined which variables have the greatest influence on each cluster.
 
-Next, we are going to figure out the characteristics of 3 cluster.
+**Cluster 1 (Red)** - High Operational Cost & Low Efficiency
+
+Key Influencing Variables:
+
+-   High Operational Cost (Operational_Cost_USD, PC3, PC4)
+
+-   Steam Turbine Engine (Engine_Type_Steam Turbine, PC3, PC5)
+
+-   Low Revenue per Voyage (Revenue_per_Voyage_USD, PC3, PC5, negative correlation)
+
+-   Transoceanic Route (Route_Type_Transoceanic, PC3)
+
+-   Low Speed (Speed_Over_Ground_knots, PC4, PC5)
+
+Business Insights:
+
+-   This cluster represents old, high-cost ships that typically use steam turbine engines and operate on long transoceanic routes with relatively low revenue generation.
+
+-   Due to high fuel consumption and low speed, these ships exhibit low operational efficiency.
+
+**Cluster 2 (Blue)** - Short-haul, Low Cargo & Weather-affected Operations
+
+Key Influencing Variables:
+
+-   Operates in Harsh Weather Conditions (Weather_Condition_Rough, PC3, PC4, PC5)
+
+-   Low Cargo Weight (Cargo_Weight_tons, PC3, PC4, PC5, negative correlation)
+
+-   Low Voyage Frequency (Weekly_Voyage_Count, PC4)
+
+-   Short-haul Routes (Route_Type_Short-haul, PC5)
+
+-   Fair Maintenance Status (Maintenance_Status_Fair, PC3)
+
+Business Insights:
+
+-   These ships operate in challenging weather conditions, leading to lower voyage frequency and cargo loads.
+
+-   Likely to be ferries, small transport vessels, or specialized ships designed for extreme environments (e.g., polar regions or storm-prone areas).
+
+-   Lower utilization rates may impact profitability.
+
+**Cluster 3 (Green)** - High-Efficiency, High Revenue, Long-haul Ships
+
+Key Influencing Variables:
+
+-   Long Travel Distance (Distance_Traveled_nm, PC3, PC4)
+
+-   High Revenue per Voyage (Revenue_per_Voyage_USD, PC3, PC5)
+
+-   Good Maintenance Status (Maintenance_Status_Good, PC3, PC5)
+
+-   High Engine Power (Engine_Power_kW, PC4)
+
+-   Long-haul Routes (Route_Type_Long-haul, PC5)
+
+-   High Speed (Speed_Over_Ground_knots, PC4, PC5)
+
+Business Insights:
+
+-   These ships demonstrate high efficiency and revenue generation, making them well-suited for long-haul, high-profit operations.
+
+-   Good maintenance conditions and high engine power enable optimal operational performance.
+
+-   Likely to be modern, fuel-efficient cargo ships or cruise liners.
+
+Next, we are going to dive deep into the characteristics of 3 cluster.
 
 First, calculate the mean of each cluster in PCA.
 
-
 ```{R}
-
+#| include: False
+#| echo: False
 library(dplyr)
 reconstructed_data <- as.data.frame(pca_data)
 if (!"Cluster" %in% colnames(reconstructed_data)) {
@@ -463,9 +719,13 @@ numeric_summary <- reconstructed_data %>%
 
 print(numeric_summary)
 ```
+
 Below, we visualize the mean and standard deviation of each principal component (PC).
+
 ### Plot PC by mean and Std
+
 ```{R}
+#| echo: False
 library(ggplot2)
 library(reshape2)
 library(dplyr)
@@ -494,8 +754,12 @@ ggplot(numeric_mean, aes(x = variable, y = value, fill = Cluster)) +
 
 
 ```
+Observation: 
+From the plot above we can know that 1. PC1, PC3, PC4, PC5, and PC6 are the key features distinguishing different clusters. 2. PC3 (Operational Cost), PC4 (Speed), PC5 (Maintenance Status), and PC6 (Fuel Efficiency) are critical factors. 3. Cluster 1 (High Cost), Cluster 2 (Short-haul Navigation), and Cluster 3 (High-efficiency Long-haul) show significant differences in these characteristics.
 
 ```{R}
+#| include: False
+#| echo: False
 
 pca_result <- prcomp(Ship_scaled, center = TRUE, scale. = TRUE)
 pca_data <- as.data.frame(pca_result$x[, 1:20])  
@@ -506,12 +770,12 @@ kmeans_result <- kmeans(pca_data, centers = 3)
 Ship_encoded$Cluster <- as.factor(kmeans_result$cluster)
 ```
 
-### Distribution of categorial variables by Cluster 
+### Distribution of Categorical variables by Cluster
+
 Below is a visualization where we can observe the distribution of categorical variables in each cluster.
 
-
 ```{R}
-
+#| echo: False
 set.seed(42)
 kmeans_result <- kmeans(pca_data, centers = 3) 
 Ship_encoded$Cluster <- as.factor(kmeans_result$cluster)  
@@ -537,10 +801,52 @@ ggplot(category_melt, aes(x = as.factor(Cluster), y = Proportion, fill = Categor
 
 ```
 
+This stacked bar chart shows the distribution of categorical features across different clusters. Each cluster is represented by a bar, and the different colors indicate the proportion of each categorical feature within the cluster.
 
+Key observation:
 
+1.  Engine Type Distribution Across Clusters
+
+-   Cluster 1 (Left Bar) has a high proportion of Engine_Type_None and Engine_Type_Steam Turbine, meaning that this cluster consists of ships that either do not have a specified engine type or use steam turbines.
+
+-   Cluster 3 (Right Bar) has a significant proportion of Engine_Type_Heavy Fuel Oil (HFO), suggesting that this cluster may consist of ships that rely on high fuel consumption engines.
+
+2\. Maintenance Status Differences
+
+-   Cluster 1 and Cluster 2 (Left and Middle Bars) contain a mix of Maintenance_Status_Fair and Maintenance_Status_Good.
+
+-   Cluster 3 (Right Bar) has a relatively higher proportion of Maintenance_Status_None, indicating that some ships in this cluster may have poor or undefined maintenance records.
+
+3\. Route Type Variations
+
+-   Cluster 1 and Cluster 3 have a significant share of Route_Type_Long-haul and Route_Type_Transoceanic, suggesting that these clusters may consist of ships operating on long-distance routes.
+
+-   Cluster 2 (Middle Bar) has a larger proportion of Route_Type_Short-haul, indicating that this group consists mainly of short-haul ships.
+
+4\. Ship Type Distribution
+
+-   Cluster 3 (Right Bar) has a higher proportion of Ship_Type_Tanker and Ship_Type_None, suggesting more oil tankers or undefined ship types in this cluster.
+
+-   Cluster 1 and Cluster 2 have more Ship_Type_Container Ship and Ship_Type_Fish Carrier, suggesting a focus on cargo and fishing ships.
+
+5\. Weather Conditions
+
+-   Cluster 1 and Cluster 2 have a more balanced mix of Weather_Condition_Moderate and Weather_Condition_None.
+
+-   Cluster 3 has a higher proportion of Weather_Condition_Rough, indicating that this group might operate in areas with rougher weather conditions.
 
 ## Summary and Conclusion
+This analysis categorizes ships into three clusters based on operational cost, efficiency, cargo capacity, route type, maintenance status, and weather impact. Cluster 1 (Red) consists of ships with high operational costs and low efficiency. These ships primarily use steam turbine engines and operate on long transoceanic routes, resulting in high fuel consumption and low revenue per voyage. Their speed is generally lower, and they have a significant proportion of Engine_Type_Steam Turbine and Route_Type_Transoceanic. While their maintenance status is fair, their high costs make them less efficient.
+
+Cluster 2 (Blue) includes short-haul ships with lower cargo capacity and voyage frequency. These vessels often operate in harsh weather conditions, affecting their operational efficiency. The cluster has a higher presence of ferries, small transport vessels, and specialized ships designed for challenging environments such as polar regions or storm-prone areas. Maintenance status in this cluster is generally fair to good, but the overall utilization rate is lower compared to other clusters.
+
+Cluster 3 (Green) represents high-efficiency, high-revenue ships that primarily operate on long-haul routes. These ships cover longer distances per voyage and generate higher revenue. They tend to have stronger engine power and higher speeds, making them well-suited for optimal operational performance. The cluster contains a higher proportion of heavy fuel oil (HFO) engines and tankers, which suggests that these vessels rely on high fuel consumption engines. Additionally, some ships in this cluster have poor or undefined maintenance records.
+
+The categorical feature analysis highlights key differences across clusters, particularly in engine type, maintenance status, route type, ship type, and weather conditions. Cluster 1 and Cluster 3 are dominated by long-haul and transoceanic routes, whereas Cluster 2 mainly consists of short-haul ships. In terms of maintenance, Cluster 1 and Cluster 2 have a mix of fair and good maintenance statuses, while Cluster 3 has a higher proportion of ships with no recorded maintenance. Cluster 3 also contains more tankers and undefined ship types, while Clusters 1 and 2 are mainly composed of container ships and fishing carriers. Weather conditions further differentiate the clusters, with Cluster 3 operating more frequently in rough weather conditions, while Clusters 1 and 2 navigate through more moderate environments.
+
+This analysis provides a comprehensive understanding of the different clusters, illustrating how key characteristics such as operational cost, efficiency, and environmental factors influence ship classification. The results help identify trends in fleet performance and provide insights into how different ship groups function within various operational conditions.
 
 ## References
+[R for Visual Analytics](https://r4va.netlify.app/)
+[Rstudio/Cheatsheets](https://github.com/rstudio/cheatsheets/blob/main/data-visualization.pdf)
 

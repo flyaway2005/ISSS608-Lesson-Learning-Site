@@ -1,1 +1,7 @@
 /* css styles */
+.custom-box {
+    border: 2px solid rgba(110, 63, 191, 0.2); /* 50% 透明度 */
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
