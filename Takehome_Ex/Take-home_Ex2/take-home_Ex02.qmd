@@ -1,0 +1,142 @@
+---
+title: "Take-home Exercise 2"
+author: "Chang Fang Yu"
+date-modified: "last-modified"
+execute:
+  echo: True
+  eval: True
+  warning: false
+  freeze: true
+---
+
+```{r}
+pacman::p_load(plotly, dplyr, scales, viridis, lubridate, ggthemes, gridExtra, readxl, knitr, data.table, CGPfunctions, ggHoriPlot, tidyverse)
+```
+
+### Import Data
+
+```{r}
+import <- read_excel("data/trade.xlsx", sheet = "T1", skip = 10)
+```
+```{r}
+head(import)
+```
+```{R}
+kable(head(import))
+```
+```{r}
+export <- read_excel("data/trade.xlsx", sheet = "T2", skip = 10)
+```
+```{r}
+head(export)
+```
+```{R}
+kable(head(export))
+```
+
+### Prepare data
+
+Step 1: Deriving month and year fields
+```{r}
+
+import_long <- import %>%
+  pivot_longer(cols = -`Data Series`, 
+               names_to = "Month_Year", 
+               values_to = "Value")
+
+import_long <- import_long %>%
+  mutate(
+    Year = as.numeric(sub(" .*", "", Month_Year)),  
+    Month = factor(sub("^[0-9]+ ", "", Month_Year), 
+                   levels = month.abb, 
+                   ordered = TRUE)
+  )
+
+
+head(import_long)
+
+```
+```{R}
+
+export_long <- export %>%
+  pivot_longer(cols = -`Data Series`, 
+               names_to = "Month_Year", 
+               values_to = "Value")
+
+
+export_long <- export_long %>%
+  mutate(
+    Year = as.numeric(sub(" .*", "", Month_Year)),  
+    Month = factor(sub("^[0-9]+ ", "", Month_Year), 
+                   levels = month.abb, 
+                   ordered = TRUE)
+  )
+
+
+head(export_long)
+
+```
+Step 2: Extracting the target year (2020 - 2024)
+```{r}
+i_total_market <- import_long %>%
+  filter(`Data Series` == "Total All Markets" & Year >= 2020 & Year <= 2024)
+
+```
+```{r}
+e_total_market <- export_long %>%
+  filter(`Data Series` == "Total All Markets" & Year >= 2020 & Year <= 2024)
+
+```
+Step 3: Plot Cycle plot and make it interactive
+
+```{r}
+
+
+#  Import + Export 
+total_combined <- i_total_market %>%
+  left_join(e_total_market, by = c("Year", "Month"), suffix = c("_import", "_export")) %>%
+  mutate(Value = Value_import + Value_export, Type = "Total (Import + Export)") %>%
+  select(Year, Month, Value, Type)
+
+# Import, Export, Total
+total_market <- bind_rows(
+  i_total_market %>% mutate(Type = "Import"),
+  e_total_market %>% mutate(Type = "Export"),
+  total_combined
+)
+
+#  Import, Export, Total
+average_values <- total_market %>%
+  group_by(Type, Month) %>%
+  summarise(AvgValue = mean(Value, na.rm = TRUE), .groups = "drop")
+
+# 式 Cycle Plot
+p <- ggplot(total_market, aes(x = Year, y = Value, group = interaction(Month, Type), color = Type, 
+                              text = paste("Year:", Year, "<br>Value:", Value, "Million Dollars(SGD)", "<br>Type:", Type))) +
+  geom_line(size = 0.8) +  
+
+
+  geom_hline(data = average_values, aes(yintercept = AvgValue, color = Type), 
+             linetype = "dashed", size = 0.5) +
+
+  facet_grid(~Month) + 
+  
+  scale_color_manual(values = c("Import" = "blue", "Export" = "green", "Total (Import + Export)" = "orange")) +  
+  
+  labs(title = "Total Merchandise Import & Export (2020-2024) with Total Sum",
+       color = "Category",
+       x = "", 
+       y = "Trade Value (Million SGD)") +
+
+  theme_minimal() +  
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+ggplotly(p, tooltip = "text")
+
+
+```
+
+
+
+
