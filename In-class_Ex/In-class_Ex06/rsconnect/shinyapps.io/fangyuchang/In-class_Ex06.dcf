@@ -1,0 +1,13 @@
+name: In-class_Ex06
+title: In-class_Ex06
+username: fangyuchang
+account: fangyuchang
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14068358
+bundleId: 9839016
+url: https://fangyuchang.shinyapps.io/In-class_Ex06/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: data/GDP.csv|data/GlobalPopulation.xls|data/Superstore-2021.xls|data/WorldCountry.csv
