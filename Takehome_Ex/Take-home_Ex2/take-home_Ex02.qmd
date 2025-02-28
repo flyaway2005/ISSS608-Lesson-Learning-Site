@@ -121,7 +121,7 @@ p <- ggplot(total_market, aes(x = Year, y = Value, group = interaction(Month, Ty
   labs(title = "Total Merchandise Import & Export (2020-2024) with Total Sum",
        color = "Category",
        x = "", 
-       y = "Trade Value (Billion SGD)") +  
+       y = "Trade Value (in Billion SGD)") +  
 
   theme_minimal() +  
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -131,6 +131,38 @@ ggplotly(p, tooltip = "text")
 
 ```
 
+```{r}
 
+# ASEAN Countries
+ASEAN <- c("Brunei", "Cambodia", "Indonesia", "Laos", "Malaysia", "Myanmar", 
+           "Philippines", "Singapore", "Thailand", "Vietnam")
+
+# Main trade partners
+selected_partners <- c("United States", "Europe", "China", "Japan", "Australia", 
+                       "Hong Kong", "United Kingdom", "Switzerland", "India", "ASEAN")
+
+# Sum the total import amount of 2019 and 2023
+trade_summary <- import_long %>%
+  filter(Year %in% c(2019, 2023)) %>%  
+  group_by(`Data Series`, Year) %>%
+  summarise(Total_Import = sum(Value, na.rm = TRUE) / 1000) %>%  # convert from million to billion
+  ungroup() %>%
+
+  mutate(`Data Series` = ifelse(`Data Series` %in% ASEAN, "ASEAN", `Data Series`)) %>%
+  group_by(`Data Series`, Year) %>%
+  summarise(Total_Import = round(sum(Total_Import, na.rm = TRUE), 2)) %>%  
+  ungroup() %>%
+  filter(`Data Series` %in% selected_partners) %>%  
+  mutate(Year = factor(Year, levels = c(2019, 2023)))  
+
+# slopegraph
+newggslopegraph(trade_summary, Year, Total_Import, `Data Series`,
+                Title = "Trade in Services (2019 vs 2023)",
+                SubTitle = "Comparison of Major Importing Partners in All Markets (in Billion SGD)",
+                Caption = "Data Source: Merchandise Trade By Region And Selected Market (Imports)") +
+  theme_minimal()  
+
+
+```
 
 
