@@ -1,0 +1,237 @@
+---
+title: "In-class Exercise 7"
+author: "Chang Fang Yu"
+date-modified: "last-modified"
+execute:
+  echo: True
+  eval: True
+  warning: false
+  freeze: true
+---
+
+```{r}
+pacman::p_load(tidyverse, tsibble, feasts, fable, seasonal)
+```
+```{r}
+ts_data <- read_csv("visitor_arrivals_by_air.csv")
+```
+### Conventional base ts object versus tibble object
+```{r}
+ts_data$'Month-Year' <- dmy(
+  ts_data$ 'Month-Year'
+)
+```
+```{r}
+ts_data
+```
+```{r}
+ts_data_ts <- ts(ts_data)       
+head(ts_data_ts)
+```
+### tsibble object
+```{R}
+ts_tsibble <- ts_data %>%
+  mutate(Month = yearmonth(`Month-Year`)) %>%
+  as_tsibble(index = `Month`)
+```
+
+## Visualising Time-series Data
+### Visualising single time-series: ggplot2 methods
+```{r}
+ts_longer <- ts_data %>%
+  pivot_longer(cols = c(2:34),
+               names_to = "Country",
+               values_to = "Arrivals")
+ts_longer %>%
+  filter(Country == "Taiwan") %>%
+  ggplot(aes(x = `Month-Year`, 
+             y = Arrivals))+
+  geom_line(size = 0.5)
+```
+### Plotting multiple time-series data with ggplot2 methods
+
+```{r}
+#| fig-height: 8
+ggplot(data = ts_longer, 
+       aes(x = `Month-Year`, 
+           y = Arrivals,
+           color = Country))+
+  geom_line(size = 0.5) +
+  theme(legend.position = "bottom", 
+        legend.box.spacing = unit(0.5, "cm"))
+
+```
+```{r eval=FALSE}
+#| ecoho: false
+#| fig-height: 12
+ggplot(data = ts_longer, 
+       aes(x = `Month-Year`, 
+           y = Arrivals))+
+  geom_line(size = 0.5) +
+  facet_wrap(~ Country,
+             ncol = 3,
+             scales = "free_y") +
+  theme_bw()
+```
+## Visual Analysis of Time-series Data
+```{r}
+tsibble_longer <- ts_tsibble %>%
+  pivot_longer(cols = c(2:34),
+               names_to = "Country",
+               values_to = "Arrivals")
+```
+### Visual Analysis of Seasonality with Seasonal Plot
+```{r}
+#| ecoho: false
+#| fig-height: 6
+tsibble_longer %>%
+  filter(Country == "Italy" |
+         Country == "Vietnam" |
+         Country == "United Kingdom" |
+         Country == "Germany") %>% 
+  gg_season(Arrivals)
+```
+###  Visual Analysis of Seasonality with Cycle Plot
+
+```{R}
+#| ecoho: false
+#| fig-height: 6
+tsibble_longer %>%
+  filter(Country == "Vietnam" |
+         Country == "Italy") %>% 
+  autoplot(Arrivals) + 
+  facet_grid(Country ~ ., scales = "free_y")
+```
+
+
+```{R}
+#| ecoho: false
+#| fig-height: 6
+tsibble_longer %>%
+  filter(Country == "Vietnam" |
+         Country == "Italy") %>% 
+  gg_subseries(Arrivals)
+```
+## Time series decomposition
+### Single time series decomposition
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam") %>%
+  ACF(Arrivals) %>% 
+  autoplot()
+```
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam") %>%
+  PACF(Arrivals) %>% 
+  autoplot()
+```
+### Multiple time-series decomposition
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam" |
+         `Country` == "Italy" |
+         `Country` == "United Kingdom" |
+         `Country` == "China") %>%
+  ACF(Arrivals) %>%
+  autoplot()
+```
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam" |
+         `Country` == "Italy" |
+         `Country` == "United Kingdom" |
+         `Country` == "China") %>%
+  PACF(Arrivals) %>%
+  autoplot()
+```
+### Composite plot of time series decomposition
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam") %>%
+  gg_tsdisplay(Arrivals)
+```
+
+## Visual STL Diagnostics
+### Visual STL diagnostics with feasts
+
+```{R}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam") %>%
+  model(stl = STL(Arrivals)) %>%
+  components() %>%
+  autoplot()
+```
+
+### Classical Decomposition with feasts
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam") %>%
+  model(
+    classical_decomposition(
+      Arrivals, type = "additive")) %>%
+  components() %>%
+  autoplot()
+```
+## Visual Forecasting
+### Time Series Data Sampling
+```{r}
+vietnam_ts <- tsibble_longer %>%
+  filter(Country == "Vietnam") %>% 
+  mutate(Type = if_else(
+    `Month-Year` >= "2019-01-01", 
+    "Hold-out", "Training"))
+vietnam_train <- vietnam_ts %>%
+  filter(`Month-Year` < "2019-01-01")
+```
+
+
+### Exploratory Data Analysis (EDA): Time Series Data
+```{R}
+vietnam_train %>%
+  model(stl = STL(Arrivals)) %>%
+  components() %>%
+  autoplot()
+```
+### Fitting forecasting models
+```{R}
+fit_ses <- vietnam_train %>%
+  model(ETS(Arrivals ~ error("A") 
+            + trend("N") 
+            + season("N")))
+fit_ses
+```
+#### Examine Model Assumptions
+```{R}
+gg_tsresiduals(fit_ses)
+```
+#### The model details
+```{R}
+fit_ses %>%
+  report()
+```
+#### Trend method
+```{R}
+vietnam_H <- vietnam_train %>%
+  model(`Holt's method` = 
+          ETS(Arrivals ~ error("A") +
+                trend("A") + 
+                season("N")))
+vietnam_H %>% report()
+```
+#### Damped Trend Method
+```{R}
+vietnam_HAd <- vietnam_train %>%
+  model(`Holt's method` = 
+          ETS(Arrivals ~ error("A") +
+                trend("Ad") + 
+                season("N")))
+vietnam_HAd %>% report()
+```
+#### Result
+```{R}
+gg_tsresiduals(vietnam_H)
+```
+```{R}
+gg_tsresiduals(vietnam_HAd)
+```

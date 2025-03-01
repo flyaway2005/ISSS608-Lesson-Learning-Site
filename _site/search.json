@@ -600,5 +600,47 @@
     "title": "Take-home Exercise 1",
     "section": "",
     "text": "R for Visual Analytics Rstudio/Cheatsheets"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex7/In-class_Ex7.html",
+    "href": "In-class_Ex/In-class_Ex7/In-class_Ex7.html",
+    "title": "In-class Exercise 7",
+    "section": "",
+    "text": "pacman::p_load(tidyverse, tsibble, feasts, fable, seasonal)\nts_data &lt;- read_csv(\"visitor_arrivals_by_air.csv\")"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#visualising-time-series-data",
+    "href": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#visualising-time-series-data",
+    "title": "In-class Exercise 7",
+    "section": "Visualising Time-series Data",
+    "text": "Visualising Time-series Data\n\nVisualising single time-series: ggplot2 methods\n\nts_longer &lt;- ts_data %&gt;%\n  pivot_longer(cols = c(2:34),\n               names_to = \"Country\",\n               values_to = \"Arrivals\")\nts_longer %&gt;%\n  filter(Country == \"Taiwan\") %&gt;%\n  ggplot(aes(x = `Month-Year`, \n             y = Arrivals))+\n  geom_line(size = 0.5)\n\n\n\n\n\n\n\n\n\n\nPlotting multiple time-series data with ggplot2 methods\n\nggplot(data = ts_longer, \n       aes(x = `Month-Year`, \n           y = Arrivals,\n           color = Country))+\n  geom_line(size = 0.5) +\n  theme(legend.position = \"bottom\", \n        legend.box.spacing = unit(0.5, \"cm\"))\n\n\n\n\n\n\n\n\n\nggplot(data = ts_longer, \n       aes(x = `Month-Year`, \n           y = Arrivals))+\n  geom_line(size = 0.5) +\n  facet_wrap(~ Country,\n             ncol = 3,\n             scales = \"free_y\") +\n  theme_bw()"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#visual-analysis-of-time-series-data",
+    "href": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#visual-analysis-of-time-series-data",
+    "title": "In-class Exercise 7",
+    "section": "Visual Analysis of Time-series Data",
+    "text": "Visual Analysis of Time-series Data\n\ntsibble_longer &lt;- ts_tsibble %&gt;%\n  pivot_longer(cols = c(2:34),\n               names_to = \"Country\",\n               values_to = \"Arrivals\")\n\n\nVisual Analysis of Seasonality with Seasonal Plot\n\ntsibble_longer %&gt;%\n  filter(Country == \"Italy\" |\n         Country == \"Vietnam\" |\n         Country == \"United Kingdom\" |\n         Country == \"Germany\") %&gt;% \n  gg_season(Arrivals)\n\n\n\n\n\n\n\n\n\n\nVisual Analysis of Seasonality with Cycle Plot\n\ntsibble_longer %&gt;%\n  filter(Country == \"Vietnam\" |\n         Country == \"Italy\") %&gt;% \n  autoplot(Arrivals) + \n  facet_grid(Country ~ ., scales = \"free_y\")\n\n\n\n\n\n\n\n\n\ntsibble_longer %&gt;%\n  filter(Country == \"Vietnam\" |\n         Country == \"Italy\") %&gt;% \n  gg_subseries(Arrivals)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#time-series-decomposition",
+    "href": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#time-series-decomposition",
+    "title": "In-class Exercise 7",
+    "section": "Time series decomposition",
+    "text": "Time series decomposition\n\nSingle time series decomposition\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\") %&gt;%\n  ACF(Arrivals) %&gt;% \n  autoplot()\n\n\n\n\n\n\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\") %&gt;%\n  PACF(Arrivals) %&gt;% \n  autoplot()\n\n\n\n\n\n\n\n\n\n\nMultiple time-series decomposition\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\" |\n         `Country` == \"Italy\" |\n         `Country` == \"United Kingdom\" |\n         `Country` == \"China\") %&gt;%\n  ACF(Arrivals) %&gt;%\n  autoplot()\n\n\n\n\n\n\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\" |\n         `Country` == \"Italy\" |\n         `Country` == \"United Kingdom\" |\n         `Country` == \"China\") %&gt;%\n  PACF(Arrivals) %&gt;%\n  autoplot()\n\n\n\n\n\n\n\n\n\n\nComposite plot of time series decomposition\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\") %&gt;%\n  gg_tsdisplay(Arrivals)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#visual-stl-diagnostics",
+    "href": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#visual-stl-diagnostics",
+    "title": "In-class Exercise 7",
+    "section": "Visual STL Diagnostics",
+    "text": "Visual STL Diagnostics\n\nVisual STL diagnostics with feasts\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\") %&gt;%\n  model(stl = STL(Arrivals)) %&gt;%\n  components() %&gt;%\n  autoplot()\n\n\n\n\n\n\n\n\n\n\nClassical Decomposition with feasts\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\") %&gt;%\n  model(\n    classical_decomposition(\n      Arrivals, type = \"additive\")) %&gt;%\n  components() %&gt;%\n  autoplot()"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#visual-forecasting",
+    "href": "In-class_Ex/In-class_Ex7/In-class_Ex7.html#visual-forecasting",
+    "title": "In-class Exercise 7",
+    "section": "Visual Forecasting",
+    "text": "Visual Forecasting\n\nTime Series Data Sampling\n\nvietnam_ts &lt;- tsibble_longer %&gt;%\n  filter(Country == \"Vietnam\") %&gt;% \n  mutate(Type = if_else(\n    `Month-Year` &gt;= \"2019-01-01\", \n    \"Hold-out\", \"Training\"))\nvietnam_train &lt;- vietnam_ts %&gt;%\n  filter(`Month-Year` &lt; \"2019-01-01\")\n\n\n\nExploratory Data Analysis (EDA): Time Series Data\n\nvietnam_train %&gt;%\n  model(stl = STL(Arrivals)) %&gt;%\n  components() %&gt;%\n  autoplot()\n\n\n\n\n\n\n\n\n\n\nFitting forecasting models\n\nfit_ses &lt;- vietnam_train %&gt;%\n  model(ETS(Arrivals ~ error(\"A\") \n            + trend(\"N\") \n            + season(\"N\")))\nfit_ses\n\n# A mable: 1 x 2\n# Key:     Country [1]\n  Country `ETS(Arrivals ~ error(\"A\") + trend(\"N\") + season(\"N\"))`\n  &lt;chr&gt;                                                   &lt;model&gt;\n1 Vietnam                                            &lt;ETS(A,N,N)&gt;\n\n\n\nExamine Model Assumptions\n\ngg_tsresiduals(fit_ses)\n\n\n\n\n\n\n\n\n\n\nThe model details\n\nfit_ses %&gt;%\n  report()\n\nSeries: Arrivals \nModel: ETS(A,N,N) \n  Smoothing parameters:\n    alpha = 0.9998995 \n\n  Initial states:\n     l[0]\n 10312.99\n\n  sigma^2:  27939164\n\n     AIC     AICc      BIC \n2911.726 2911.913 2920.374 \n\n\n\n\nTrend method\n\nvietnam_H &lt;- vietnam_train %&gt;%\n  model(`Holt's method` = \n          ETS(Arrivals ~ error(\"A\") +\n                trend(\"A\") + \n                season(\"N\")))\nvietnam_H %&gt;% report()\n\nSeries: Arrivals \nModel: ETS(A,A,N) \n  Smoothing parameters:\n    alpha = 0.9998995 \n    beta  = 0.0001004625 \n\n  Initial states:\n     l[0]     b[0]\n 13673.29 525.8859\n\n  sigma^2:  28584805\n\n     AIC     AICc      BIC \n2916.695 2917.171 2931.109 \n\n\n\n\nDamped Trend Method\n\nvietnam_HAd &lt;- vietnam_train %&gt;%\n  model(`Holt's method` = \n          ETS(Arrivals ~ error(\"A\") +\n                trend(\"Ad\") + \n                season(\"N\")))\nvietnam_HAd %&gt;% report()\n\nSeries: Arrivals \nModel: ETS(A,Ad,N) \n  Smoothing parameters:\n    alpha = 0.9998999 \n    beta  = 0.0001098602 \n    phi   = 0.9784562 \n\n  Initial states:\n     l[0]   b[0]\n 13257.28 523.54\n\n  sigma^2:  28641536\n\n     AIC     AICc      BIC \n2917.921 2918.593 2935.218 \n\n\n\n\nResult\n\ngg_tsresiduals(vietnam_H)\n\n\n\n\n\n\n\n\n\ngg_tsresiduals(vietnam_HAd)"
   }
 ]
