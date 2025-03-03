@@ -3,144 +3,193 @@ title: "Take-home Exercise 2"
 author: "Chang Fang Yu"
 date-modified: "last-modified"
 execute:
-  echo: True
+  echo: False
   eval: True
   warning: false
   freeze: true
 ---
 
+# Data Visualization Optimization - Singapore's International Trade
+
+In this take-home exercise, I choose 3 infographics to enhance the visualization for better clarity and understanding from Singapore Department of Statistics. (n.d.). *Singapore international trade*. Retrieved from <https://www.singstat.gov.sg/modules/infographics/singapore-international-trade>. The data source is from Singstat, specifically Merchandise Trade by Commodity Section/Division and Merchandise Trade by Region/Market.
+
+## Topic 1: [TOTAL MERCHANDISE TRADE AT CURRENT PRICES, 2020 - 2024](https://www.singstat.gov.sg/modules/infographics/singapore-international-trade)
+
+![TOTAL MERCHANDISE TRADE AT CURRENT PRICES, 2020 - 2024](images/01.png)
+
+The advantages of the infographic: "[TOTAL MERCHANDISE TRADE AT CURRENT PRICES, 2020 - 2024](https://www.singstat.gov.sg/modules/infographics/singapore-international-trade)"
+
+Areas for improvement of the infographic:
+
+### Load the R packages and import data
+
+The dataset for this topic include 3 table:
+
+-   Merchandise Trade By Region And Selected Market (Imports), Monthly:\
+    named as "import_m" in the following analysis
+
+-   Merchandise Trade By Region And Selected Market (Domestic Exports), Monthly: named as "export_m"
+
+-   Merchandise Trade By Region And Selected Market (Re-Exports), Monthly: named as "re_export_m"
+
 ```{r}
 pacman::p_load(plotly, dplyr, scales, viridis, lubridate, ggthemes, gridExtra, readxl, knitr, data.table, CGPfunctions, ggHoriPlot, tidyverse)
 ```
 
-### Import Data
+```{r}
+import_m <- read_excel("data/trade.xlsx", sheet = "T1", skip = 10)
+export_m <- read_excel("data/trade.xlsx", sheet = "T2", skip = 10)
+re_export_m <- read_excel("data/trade.xlsx", sheet = "T3", skip = 10)
+
+```
 
 ```{r}
-import <- read_excel("data/trade.xlsx", sheet = "T1", skip = 10)
+head(import_m)
 ```
+
 ```{r}
-head(import)
+head(export_m)
 ```
+
+```{r}
+head(re_export_m)
+```
+
+### Data pre-processing
+
+The original infographic represents "Export" as a combination of both export and re-export from the raw dataset. Therefore, in this step, we combine these two datasets to calculate Total Export, ensuring consistency with the original representation. Additionally, we derive the Month and Year columns for further analysis.
+
+```{r}
+#import(merchandise)
+
+import_m_long <- import_m %>%
+    pivot_longer(cols = -`Data Series`,  
+                 names_to = "Month_Year", 
+                 values_to = "Value") %>%
+    mutate(
+        Year = as.numeric(sub(" .*", "", Month_Year)),  
+        Month = factor(sub("^[0-9]+ ", "", Month_Year), 
+                       levels = month.abb,  
+                       ordered = TRUE)
+    ) %>%
+    select(`Data Series`, Year, Month, Value)  
+
+```
+
 ```{R}
-kable(head(import))
+
+#  Long Format
+export_m_long <- export_m %>%
+    pivot_longer(cols = -`Data Series`,
+                 names_to = "Month_Year",
+                 values_to = "Export_Value")
+
+re_export_m_long <- re_export_m %>%
+    pivot_longer(cols = -`Data Series`,
+                 names_to = "Month_Year",
+                 values_to = "Re_Export_Value")
+
+# combine Export and Re-Export 
+total_export_m <- left_join(export_m_long, re_export_m_long, 
+                            by = c("Data Series", "Month_Year")) %>%
+    mutate(Total_Export_Value = Export_Value + Re_Export_Value) %>%
+    select(`Data Series`, Month_Year, Total_Export_Value)
+
+# Derive Year and Month
+total_export_m <- total_export_m %>%
+    mutate(
+        Year = as.numeric(sub(" .*", "", Month_Year)),
+        Month = factor(sub("^[0-9]+ ", "", Month_Year), levels = month.abb, ordered = TRUE)
+    ) %>%
+    select(`Data Series`, Year, Month, Total_Export_Value)
+
 ```
+
+### Interactive Plot
+
+::: panel-tabset
+### Plot 1
 ```{r}
-export <- read_excel("data/trade.xlsx", sheet = "T2", skip = 10)
-```
-```{r}
-head(export)
-```
-```{R}
-kable(head(export))
-```
+#| ecoho: false
+#| fig-height: 6
 
-### Prepare data
+filtered_import <- import_m_long %>%
+  filter(`Data Series` == "Total All Markets", Year >= 2020 & Year <= 2024)
 
-Step 1: Deriving month and year fields
-```{r}
+filtered_export <- total_export_m %>%
+  filter(`Data Series` == "Total All Markets", Year >= 2020 & Year <= 2024)
 
-import_long <- import %>%
-  pivot_longer(cols = -`Data Series`, 
-               names_to = "Month_Year", 
-               values_to = "Value")
 
-import_long <- import_long %>%
+combined_data <- filtered_import %>%
+  rename(Import_Value = Value) %>%
+  left_join(filtered_export %>% rename(Total_Export_Value = Total_Export_Value), by = c("Year", "Month")) %>%
   mutate(
-    Year = as.numeric(sub(" .*", "", Month_Year)),  
-    Month = factor(sub("^[0-9]+ ", "", Month_Year), 
-                   levels = month.abb, 
-                   ordered = TRUE)
-  )
+    Import_Value = Import_Value / 1000,                 
+    Total_Export_Value = Total_Export_Value / 1000,   
+    Total_trade = (Import_Value + Total_Export_Value),    
+  ) %>%
+  pivot_longer(cols = c(Import_Value, Total_Export_Value, Total_trade), names_to = "Type", values_to = "Value")
 
 
-head(import_long)
-
-```
-```{R}
-
-export_long <- export %>%
-  pivot_longer(cols = -`Data Series`, 
-               names_to = "Month_Year", 
-               values_to = "Value")
-
-
-export_long <- export_long %>%
-  mutate(
-    Year = as.numeric(sub(" .*", "", Month_Year)),  
-    Month = factor(sub("^[0-9]+ ", "", Month_Year), 
-                   levels = month.abb, 
-                   ordered = TRUE)
-  )
-
-
-head(export_long)
-
-```
-Step 2: Extracting the target year (2020 - 2024)
-```{r}
-i_total_market <- import_long %>%
-  filter(`Data Series` == "Total All Markets" & Year >= 2020 & Year <= 2024)
-
-```
-```{r}
-e_total_market <- export_long %>%
-  filter(`Data Series` == "Total All Markets" & Year >= 2020 & Year <= 2024)
-
-```
-Step 3: Plot Cycle plot, make it interactive, and convert the units from million SGD to billion SGD
-
-```{r}
-
-total_combined <- i_total_market %>%
-  left_join(e_total_market, by = c("Year", "Month"), suffix = c("_import", "_export")) %>%
-  mutate(Value = (Value_import + Value_export) / 1000, Type = "Total (Import + Export)") %>%  
-  select(Year, Month, Value, Type)
-
-total_market <- bind_rows(
-  i_total_market %>% mutate(Type = "Import", Value = Value / 1000),
-  e_total_market %>% mutate(Type = "Export", Value = Value / 1000),
-  total_combined
-)
-
-average_values <- total_market %>%
+average_values <- combined_data %>%
   group_by(Type, Month) %>%
   summarise(AvgValue = mean(Value, na.rm = TRUE), .groups = "drop")
 
-p <- ggplot(total_market, aes(x = Year, y = Value, group = interaction(Month, Type), color = Type, 
-                              text = paste("Year:", Year, "<br>Value:", round(Value, 2), "Billion SGD", "<br>Type:", Type))) +
+
+p <- ggplot(combined_data, aes(x = Year, y = Value, group = Type, color = Type)) +
   geom_line(size = 0.8) +  
-
-
-  geom_hline(data = average_values, aes(yintercept = AvgValue, color = Type), 
-             linetype = "dashed", size = 0.5) +
-
-  facet_grid(~Month) +  
-  
-  scale_color_manual(values = c("Import" = "blue", "Export" = "green", "Total (Import + Export)" = "orange")) +  
-  
-  labs(title = "Total Merchandise Import & Export (2020-2024) with Total Sum",
-       color = "Category",
+  geom_point(size = 1) +  
+  geom_hline(data = average_values, aes(yintercept = AvgValue), linetype = "dotted", size = 0.3) +  
+  facet_wrap(~Month, nrow = 1) +  
+  scale_color_manual(values = c("Import_Value" = "blue", "Total_Export_Value" = "green", "Total_trade" = "orange")) +  
+  labs(title = "TOTAL MERCHANDISE TRADE(2020-2024)",
        x = "", 
        y = "Trade Value (in Billion SGD)") +  
-
   theme_minimal() +  
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+        strip.text = element_text(size = 10, face = "bold"),
+        legend.position = "none")  
 
-ggplotly(p, tooltip = "text")
-
+ggplotly(p)
 
 ```
+### Plot 2
+```{r}
+#| ecoho: false
+#| fig-height: 5
+annual_total <- combined_data %>%
+  group_by(Year, Type) %>%
+  summarise(TotalValue = sum(Value, na.rm = TRUE), .groups = "drop")
+
+p_annual <- ggplot(annual_total, aes(x = Year, y = TotalValue, group = Type, color = Type)) +
+  geom_line(size = 1) +  
+  geom_point(size = 1.2) +  
+  scale_color_manual(values = c("Import_Value" = "blue", "Total_Export_Value" = "green", "Total_trade" = "orange")) +  
+  labs(title = "Total Merchandise Trade Value (2020-2024)",
+       x = "Year", 
+       y = "Total Trade Value (in Billion SGD)") +  
+  theme_minimal() +  
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+        legend.position = "bottom")  
+
+ggplotly(p_annual)
+
+```
+:::
 
 ### Import Data
 
 ```{r}
 import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
 ```
+
 ```{R}
 kable(head(import_s))
 ```
-```{r}
 
+```{r}
+#| ecoho: false
+#| fig-height: 6
 import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
 
 import_long <- import_s %>%
@@ -175,7 +224,8 @@ newggslopegraph(trade_summary, Year, Total_Import, `Data Series`,
 ```
 
 ```{r}
-
+#| ecoho: false
+#| fig-height: 6
 export_s <- read_excel("data/exports_services.xlsx", sheet = "T1", skip = 10)
 
 export_long <- export_s %>%
@@ -208,9 +258,3 @@ newggslopegraph(trade_summary, Year, Total_export, `Data Series`,
   theme_minimal()
 
 ```
-
-
-
-
-
-
