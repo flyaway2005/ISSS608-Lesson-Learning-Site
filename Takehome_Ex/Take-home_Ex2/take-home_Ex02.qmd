@@ -322,14 +322,14 @@ import_long <- import_s %>%
   pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Import_Value") %>%
   mutate(Year = as.integer(Year), 
          Import_Value = as.numeric(Import_Value)) %>%
-  filter(Year == 2023 & !`Data Series` %in% c("Asia", "Europe", "North America" ))
+  filter(Year == 2023 & !`Data Series` %in% c("Asia", "Europe", "North America", "Oceania", "South And Central America And The Caribbean" ))
 
 export_long <- export_s %>%
   mutate(across(-`Data Series`, as.character)) %>%
   pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Export_Value") %>%
   mutate(Year = as.integer(Year), 
          Export_Value = as.numeric(Export_Value)) %>%
-  filter(Year == 2023 & !`Data Series` %in% c("Asia", "Europe", "North America"  ))
+  filter(Year == 2023 & !`Data Series` %in% c("Asia", "Europe", "North America", "Oceania", "South And Central America And The Caribbean"  ))
 
 # 合併 Import 和 Export 數據
 trade_2023 <- import_long %>%
