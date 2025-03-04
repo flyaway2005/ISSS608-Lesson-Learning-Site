@@ -17,9 +17,16 @@ In this take-home exercise, I choose 3 infographics to enhance the visualization
 
 ![TOTAL MERCHANDISE TRADE AT CURRENT PRICES, 2020 - 2024](images/01.png)
 
-The advantages of the infographic: "[TOTAL MERCHANDISE TRADE AT CURRENT PRICES, 2020 - 2024](https://www.singstat.gov.sg/modules/infographics/singapore-international-trade)"
+The advantages of the infographic:
+
+1.  The graph's visual design aligns with the trade theme.
+2.  The distinct colors helps differentiate different different year quickly.
+3.  The data labels is concise and the inclusion of numeric values enhances readability.
 
 Areas for improvement of the infographic:
+
+1.   Users can't explore specific data point due to limited interactivity.
+2.  The trend on total trade value is not clear shown.
 
 ### Load the R packages and import data
 
@@ -33,7 +40,7 @@ The dataset for this topic include 3 table:
 -   Merchandise Trade By Region And Selected Market (Re-Exports), Monthly: named as "re_export_m"
 
 ```{r}
-pacman::p_load(plotly, dplyr, scales, viridis, lubridate, ggthemes, gridExtra, readxl, knitr, data.table, CGPfunctions, ggHoriPlot, tidyverse)
+pacman::p_load(plotly, dplyr, scales, viridis, lubridate, ggthemes, gridExtra, readxl, knitr, data.table, CGPfunctions, ggHoriPlot, tidyverse, CGPfunctions)
 ```
 
 ```{r}
@@ -43,17 +50,29 @@ re_export_m <- read_excel("data/trade.xlsx", sheet = "T3", skip = 10)
 
 ```
 
-```{r}
-head(import_m)
-```
+### Data Set for Topic 1, 2
+
+::: panel-tabset
+### Import(Merchandise)
 
 ```{r}
-head(export_m)
+
+kable(head(import_m))
 ```
 
-```{r}
-head(re_export_m)
+### Export(Merchandise)
+
+```{R}
+kable(head(export_m))
 ```
+
+### Re-Export(Merchandise)
+
+```{r}
+kable(head(re_export_m))
+
+```
+:::
 
 ### Data pre-processing
 
@@ -109,9 +128,10 @@ total_export_m <- total_export_m %>%
 
 ::: panel-tabset
 ### Plot 1
+
 ```{r}
 #| ecoho: false
-#| fig-height: 6
+
 
 filtered_import <- import_m_long %>%
   filter(`Data Series` == "Total All Markets", Year >= 2020 & Year <= 2024)
@@ -153,10 +173,12 @@ p <- ggplot(combined_data, aes(x = Year, y = Value, group = Type, color = Type))
 ggplotly(p)
 
 ```
+
 ### Plot 2
+
 ```{r}
 #| ecoho: false
-#| fig-height: 5
+
 annual_total <- combined_data %>%
   group_by(Year, Type) %>%
   summarise(TotalValue = sum(Value, na.rm = TRUE), .groups = "drop")
@@ -177,84 +199,338 @@ ggplotly(p_annual)
 ```
 :::
 
-### Import Data
+## Topic 2: MERCHANDISE TRADE PERFORMANCE WITH MAJOR TRADING PARTNERS, 2024
+
+![MERCHANDISE TRADE PERFORMANCE WITH MAJOR TRADING PARTNERS, 2024](images/02-01.png)
+
+The advantages of the infographic:
+
+1.   The chart effectively utilize different colors to label each country's merchandise trede value, making it clear to interpret
+2.  The varying sizes of the circles visually illustrate the trade volume, allowing users to compare between different countries.
+3.  The smart use of background color which differentiate trade surplus and deficit, providing an important layer of insight to the data.
+
+Areas for improvement of the infographic:
+
+1.  Lacking of interactivity.
 
 ```{r}
-import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
+#| ecoho: false
+
+import_2024 <- import_m %>%
+  select(`Data Series`, contains("2024")) %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Month_Year", values_to = "Import_Value") %>%
+  group_by(`Data Series`) %>%
+  summarise(Import_Value = sum(Import_Value, na.rm = TRUE), .groups = "drop")
+
+export_2024 <- export_m %>%
+  select(`Data Series`, contains("2024")) %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Month_Year", values_to = "Export_Value") %>%
+  group_by(`Data Series`) %>%
+  summarise(Export_Value = sum(Export_Value, na.rm = TRUE), .groups = "drop")
+
+re_export_2024 <- re_export_m %>%
+  select(`Data Series`, contains("2024")) %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Month_Year", values_to = "Re_Export_Value") %>%
+  group_by(`Data Series`) %>%
+  summarise(Re_Export_Value = sum(Re_Export_Value, na.rm = TRUE), .groups = "drop")
+
+
+trade_2024 <- import_2024 %>%
+  left_join(export_2024, by = "Data Series") %>%
+  left_join(re_export_2024, by = "Data Series") %>%
+  mutate(
+    Import_Value = Import_Value / 1000, 
+    Export_Value = Export_Value / 1000,   
+    Re_Export_Value = Re_Export_Value / 1000, 
+    Total_Export_Value = (Export_Value + Re_Export_Value), 
+    Total_Trade = (Import_Value + Total_Export_Value)
+  ) %>%
+  filter(!`Data Series` %in% c("Total All Markets", "Asia")) %>%
+  arrange(desc(Total_Trade)) %>%  
+  slice(1:12)
+
+
+max_value <- max(trade_2024$Total_Export_Value, trade_2024$Import_Value, na.rm = TRUE)
+
+p <- ggplot(trade_2024, aes(x = Total_Export_Value, y = Import_Value, size = Total_Trade, fill = `Data Series`)) +
+  
+
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "gray") +
+  
+
+  annotate("polygon", 
+         x = c(0, max_value, 0), 
+         y = c(0, max_value, max_value), 
+         fill = "lightblue", alpha = 0.2) +
+
+  geom_point(shape = 21, alpha = 0.8, color = "white") +
+  scale_size(range = c(3, 15)) +
+
+  labs(title = "Merchandise Trade Performance 
+       with Top Trading Partners (2024)",
+       x = "Exports (S$ Bil)",
+       y = "Imports (S$ Bil)",
+       size = "Total Trade (S$ Bil)",
+       fill = "Country") +
+
+
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        plot.caption = element_text(hjust = 0, size = 8, face = "bold", color = "gray30"))
+
+ggplotly(p, tooltip = c("x", "y", "size", "fill"))
+
 ```
 
+## Topic 3: MAJOR TRADING PARTNERS FOR TRADE IN SERVICES, 2023
+
+![MAJOR TRADING PARTNERS FOR TRADE IN SERVICES, 2023](images/03.png)
+
+The advantages of the infographic:
+
+Areas for improvement of the infographic:
+
+### Data Set for Topic 3
+
+::: panel-tabset
+### Import(services)
+
 ```{R}
+import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
 kable(head(import_s))
 ```
 
-```{r}
-#| ecoho: false
-#| fig-height: 6
-import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
+### Export(services)
 
+```{R}
+export_s <- read_excel("data/exports_services.xlsx", sheet = "T1", skip = 10)
+kable(head(export_s))
+```
+:::
+
+### Create a top 10 trade partners list from 2023
+
+```{r}
+
+# 讀取數據
+import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
+export_s <- read_excel("data/exports_services.xlsx", sheet = "T1", skip = 10)
+
+# 轉換數據格式 (long format) 並過濾2023年數據
 import_long <- import_s %>%
   mutate(across(-`Data Series`, as.character)) %>%
-  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Value") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Import_Value") %>%
   mutate(Year = as.integer(Year), 
-         Value = as.numeric(Value))  
-
-top_10_partners_2023 <- import_long %>%
-  filter(Year == 2023) %>%
-  group_by(`Data Series`) %>%
-  summarise(Total_Import_2023 = sum(Value, na.rm = TRUE)) %>%
-  arrange(desc(Total_Import_2023)) %>%
-  slice_head(n = 10) %>%
-  pull(`Data Series`)  
-
-
-trade_summary <- import_long %>%
-  filter(Year %in% c(2019, 2023) & `Data Series` %in% top_10_partners_2023) %>%
-  group_by(`Data Series`, Year) %>%
-  summarise(Total_Import = round(sum(Value, na.rm = TRUE) / 1000, 1)) %>%  
-  ungroup() %>%
-  mutate(Year = factor(Year, levels = c(2019, 2023)))
-
-
-newggslopegraph(trade_summary, Year, Total_Import, `Data Series`,
-  Title = "Top Trade Partners (2019 vs 2023)",
-  SubTitle = "Comparison of Top Importing Countries in 2023 (in Billion SGD)",
-  Caption = "Data Source: Imports Of Services By Major Trading Partner") +
-  theme_minimal()
-
-```
-
-```{r}
-#| ecoho: false
-#| fig-height: 6
-export_s <- read_excel("data/exports_services.xlsx", sheet = "T1", skip = 10)
+         Import_Value = as.numeric(Import_Value)) %>%
+  filter(Year == 2023 & !`Data Series` %in% c("Asia", "Europe", "North America" ))
 
 export_long <- export_s %>%
   mutate(across(-`Data Series`, as.character)) %>%
-  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Value") %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Export_Value") %>%
   mutate(Year = as.integer(Year), 
-         Value = as.numeric(Value))  
+         Export_Value = as.numeric(Export_Value)) %>%
+  filter(Year == 2023 & !`Data Series` %in% c("Asia", "Europe", "North America"  ))
 
-top_10_partners_2023 <- export_long %>%
-  filter(Year == 2023) %>%
-  group_by(`Data Series`) %>%
-  summarise(Total_export_2023 = sum(Value, na.rm = TRUE)) %>%
-  arrange(desc(Total_export_2023)) %>%
+# 合併 Import 和 Export 數據
+trade_2023 <- import_long %>%
+  full_join(export_long, by = "Data Series") %>%
+  mutate(
+    Import_Value = replace_na(Import_Value, 0),  # 若無數據則填補 0
+    Export_Value = replace_na(Export_Value, 0),
+    Total_Trade = Import_Value + Export_Value   # 計算總貿易額
+  )
+
+# 選出前十大貿易夥伴
+top_10_partners_2023 <- trade_2023 %>%
+  arrange(desc(Total_Trade)) %>%
   slice_head(n = 10) %>%
-  pull(`Data Series`)  
+  pull(`Data Series`)
 
+# 顯示前十名貿易夥伴
+print(top_10_partners_2023)
 
-trade_summary <- export_long %>%
-  filter(Year %in% c(2019, 2023) & `Data Series` %in% top_10_partners_2023) %>%
+```
+
+### Plot slope graphs
+
+Next, we will use the list of the top 10 trading partners in 2023 to create a slope graph comparing 2019 and 2023. The graph will be interactive, allowing users to hover over a country to display a tooltip showing the total trade, import, and export values for that year. This presentation will be more concise and clearer than the original infographic.
+
+```{r}
+#| ecoho: false
+
+import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
+export_s <- read_excel("data/exports_services.xlsx", sheet = "T1", skip = 10)
+
+# 轉換數據格式 (long format) 並篩選 2019 和 2023 年數據
+import_long <- import_s %>%
+  mutate(across(-`Data Series`, as.character)) %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Import_Value") %>%
+  mutate(Year = as.integer(Year),
+         Import_Value = as.numeric(Import_Value)) %>%
+  filter(Year %in% c(2019, 2023)) # 只保留2019和2023年的數據
+
+export_long <- export_s %>%
+  mutate(across(-`Data Series`, as.character)) %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Export_Value") %>%
+  mutate(Year = as.integer(Year),
+         Export_Value = as.numeric(Export_Value)) %>%
+  filter(Year %in% c(2019, 2023)) # 只保留2019和2023年的數據
+
+# 合併 Import 和 Export 數據
+trade_2023 <- import_long %>%
+  left_join(export_long, by = c("Data Series", "Year")) %>%
+  mutate(Total_Trade = Import_Value + Export_Value) %>%
+  filter(`Data Series` %in% top_10_partners_2023) %>% # 只保留2023年前十大貿易夥伴
   group_by(`Data Series`, Year) %>%
-  summarise(Total_export = round(sum(Value, na.rm = TRUE) / 1000, 1)) %>%  
+  summarise(
+    Import_Value = round(sum(Import_Value, na.rm = TRUE) / 1000, 1),
+    Export_Value = round(sum(Export_Value, na.rm = TRUE) / 1000, 1),
+    Total_Trade = round(sum(Total_Trade, na.rm = TRUE) / 1000, 1), .groups = "drop"
+  ) %>%  # 單位轉換為Billion
   ungroup() %>%
-  mutate(Year = factor(Year, levels = c(2019, 2023)))
+  mutate(Year = factor(Year, levels = c(2019, 2023))) # 設定年份順序
+
+# 繪製 Slope Graph
+trade_plot <- ggplot(trade_2023, aes(x = Year, y = Total_Trade, group = `Data Series`, text = paste(
+    "Country: ", `Data Series`, "<br>",
+    "Total Trade: ", Total_Trade, "B SGD<br>",
+    "Import: ", Import_Value, "B SGD<br>",
+    "Export: ", Export_Value, "B SGD"
+  ))) +
+  geom_line(aes(color = `Data Series`), size = 0.9) +
+  geom_point(aes(color = `Data Series`), size = 1.3) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Top Trade Partners (2019 vs 2023)",
+    subtitle = "Comparison of Top Trade Countries in 2023 (in Billion SGD)",
+    caption = "Data Source: Imports and Exports of Services by Major Trading Partner",
+    x = NULL, y = "Total Trade (Billion SGD)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+# 轉換為互動式圖表
+trade_plotly <- ggplotly(trade_plot, tooltip = "text")
+
+# 顯示互動式 Slope Graph
+trade_plotly
 
 
-newggslopegraph(trade_summary, Year, Total_export, `Data Series`,
+```
+
+If we use a static design for the slope graph, we would need three separate charts to compare total trade, export, and import between 2019 and 2023, as shown below.
+
+::: panel-tabset
+### Total trade value
+
+```{r}
+#| ecoho: false
+#| fig-height: 6
+
+import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
+export_s <- read_excel("data/exports_services.xlsx", sheet = "T1", skip = 10)
+
+
+import_long <- import_s %>%
+  mutate(across(-`Data Series`, as.character)) %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Import_Value") %>%
+  mutate(Year = as.integer(Year),
+         Import_Value = as.numeric(Import_Value)) %>%
+  filter(Year %in% c(2019, 2023)) 
+
+export_long <- export_s %>%
+  mutate(across(-`Data Series`, as.character)) %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Export_Value") %>%
+  mutate(Year = as.integer(Year),
+         Export_Value = as.numeric(Export_Value)) %>%
+  filter(Year %in% c(2019, 2023)) 
+
+# combine Import and Export 
+trade_2023 <- import_long %>%
+  left_join(export_long, by = c("Data Series", "Year")) %>%
+  mutate(Total_Trade = Import_Value + Export_Value) %>%
+  filter(`Data Series` %in% top_10_partners_2023) %>% 
+  group_by(`Data Series`, Year) %>%
+  summarise(Total_Trade = round(sum(Total_Trade, na.rm = TRUE) / 1000, 1), .groups = "drop") %>%  
+  ungroup() %>%
+  mutate(Year = factor(Year, levels = c(2019, 2023))) 
+
+# Slope Graph
+newggslopegraph(trade_2023, Year, Total_Trade, `Data Series`,
   Title = "Top Trade Partners (2019 vs 2023)",
-  SubTitle = "Comparison of Top Exporting Countries in 2023 (in Billion SGD)",
-  Caption = "Data Source: Exports Of Services By Major Trading Partner") +
+  SubTitle = "Comparison of Top Trade Countries in 2023 (in Billion SGD)",
+  Caption = "Data Source: Imports and Exports of Services by Major Trading Partner") +
   theme_minimal()
 
 ```
+
+```{r}
+#| ecoho: false
+#| fig-height: 5
+
+import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
+export_s <- read_excel("data/exports_services.xlsx", sheet = "T1", skip = 10)
+
+# long format, filter 2019, 2023 
+import_long <- import_s %>%
+  mutate(across(-`Data Series`, as.character)) %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Import_Value") %>%
+  mutate(Year = as.integer(Year),
+         Import_Value = as.numeric(Import_Value)) %>%
+  filter(Year %in% c(2019, 2023)) 
+
+export_long <- export_s %>%
+  mutate(across(-`Data Series`, as.character)) %>%
+  pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Export_Value") %>%
+  mutate(Year = as.integer(Year),
+         Export_Value = as.numeric(Export_Value)) %>%
+  filter(Year %in% c(2019, 2023)) 
+
+# Import 
+import_summary <- import_long %>%
+  filter(`Data Series` %in% top_10_partners_2023) %>% 
+  group_by(`Data Series`, Year) %>%
+  summarise(Total_Import = round(sum(Import_Value, na.rm = TRUE) / 1000, 1), .groups = "drop") %>%  
+  ungroup() %>%
+  mutate(Year = factor(Year, levels = c(2019, 2023))) 
+
+# Import Slope Graph
+import_plot <- newggslopegraph(import_summary, Year, Total_Import, `Data Series`,
+  Title = "Top Importing Partners (2019 vs 2023)",
+  SubTitle = "Comparison of Top Trade Countries in 2023 (in Billion SGD)",
+  Caption = "Data Source: Imports of Services by Major Trading Partner") +
+  theme_minimal()
+
+# Export 
+export_summary <- export_long %>%
+  filter(`Data Series` %in% top_10_partners_2023) %>% 
+  group_by(`Data Series`, Year) %>%
+  summarise(Total_Export = round(sum(Export_Value, na.rm = TRUE) / 1000, 1), .groups = "drop") %>% 
+  ungroup() %>%
+  mutate(Year = factor(Year, levels = c(2019, 2023))) 
+
+# Export Slope Graph
+export_plot <- newggslopegraph(export_summary, Year, Total_Export, `Data Series`,
+  Title = "Top Exporting Partners (2019 vs 2023)",
+  SubTitle = "Comparison of Top Trade Countries in 2023 (in Billion SGD)",
+  Caption = "Data Source: Exports of Services by Major Trading Partner") +
+  theme_minimal()
+
+```
+
+### Import
+
+```{r}
+#| ecoho: false
+#| fig-height: 6
+import_plot
+```
+
+### Export
+
+```{r}
+#| ecoho: false
+#| fig-height: 6
+export_plot
+```
+:::
