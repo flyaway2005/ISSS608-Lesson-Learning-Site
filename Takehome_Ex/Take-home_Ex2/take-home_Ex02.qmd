@@ -9,26 +9,24 @@ execute:
   freeze: true
 ---
 
-# Data Visualization Optimization - Singapore's International Trade
+# Time Series Data Optimization and Visualization - Singapore's International Trade
 
-In this exercise, I choose 3 infographics to enhance the visualization for better clarity and understanding from Singapore Department of Statistics. (n.d.). *Singapore international trade*. Retrieved from <https://www.singstat.gov.sg/modules/infographics/singapore-international-trade>. The data source is from Singstat, specifically Merchandise Trade by Commodity Section/Division and Merchandise Trade by Region/Market. Besides, I will introduce time series analyse on the same data set to aquire more insights. \## Part 1. Infograpic Make-OVer
+In this exercise, there are 2 components to illustrate the visiualization by R packages. In part 1, I choose 3 infographics to enhance the visualization for better clarity and understanding from Singapore Department of Statistics. (n.d.). *Singapore international trade*. Retrieved from <https://www.singstat.gov.sg/modules/infographics/singapore-international-trade>. 
+In part 2, I select the "Merchandise Trade by Region/Market" dataset to perform time series analysis.
+
+The data source of the two components is from Singstat, specifically "Merchandise Trade by Region/Market", and "International Trade in Services".
+
+## Part 1. Infographic Makeover
 
 ### Topic 1: [TOTAL MERCHANDISE TRADE AT CURRENT PRICES, 2020 - 2024](https://www.singstat.gov.sg/modules/infographics/singapore-international-trade)
 
 ![TOTAL MERCHANDISE TRADE AT CURRENT PRICES, 2020 - 2024](images/01.png)
 
-The advantages of the infographic:
+The infographic effectively aligns its visual design with the trade theme, creating a clear and engaging presentation. The use of distinct colors helps differentiate between different years at a glance, while concise data labels and the inclusion of numeric values enhance readability. 
+However, there are areas for improvement. The lack of interactivity prevents users from exploring specific data points, and the overall trend of total trade value is not clearly presented. 
+In the makeover, interactivity will be incorporated to allow users to engage with the data dynamically. Additionally, improvements will be made to better highlight the overall trade trends, making it easier to capture long-term patterns and observe any seasonal variations between different months.
 
-1.  The graph's visual design aligns with the trade theme.
-2.  The distinct colors helps differentiate different different year quickly.
-3.  The data labels is concise and the inclusion of numeric values enhances readability.
-
-Areas for improvement of the infographic:
-
-1.  Users can't explore specific data point due to limited interactivity.
-2.  The trend on total trade value is not clear shown.
-
-### Load the R packages and import data
+#### Load the R packages and import data
 
 The dataset for this topic include 3 table:
 
@@ -50,7 +48,7 @@ re_export_m <- read_excel("data/trade.xlsx", sheet = "T3", skip = 10)
 
 ```
 
-### Data Set for Topic 1, 2
+#### Data Set for Topic 1, 2
 
 ::: panel-tabset
 ### Import(Merchandise)
@@ -74,9 +72,9 @@ kable(head(re_export_m))
 ```
 :::
 
-### Data pre-processing
+#### Data Pre-processing
 
-The original infographic represents "Export" as a combination of both export and re-export from the raw dataset. Therefore, in this step, we combine these two datasets to calculate Total Export, ensuring consistency with the original representation. Additionally, we derive the Month and Year columns for further analysis.
+The original infographic represents "Export" as a combination of both export and re-export from the raw dataset. Therefore, in this step, we combine these two data sets to calculate Total Export, ensuring consistency with the original representation. Additionally, we derive the Month and Year columns for further analysis.
 
 ```{r}
 #import(merchandise)
@@ -124,7 +122,7 @@ total_export_m <- total_export_m %>%
 
 ```
 
-### Interactive Plot
+#### Makeover Plot
 
 ::: panel-tabset
 ### Plot 1
@@ -144,8 +142,8 @@ combined_data <- filtered_import %>%
   rename(Import_Value = Value) %>%
   left_join(filtered_export %>% rename(Total_Export_Value = Total_Export_Value), by = c("Year", "Month")) %>%
   mutate(
-    Import_Value = Import_Value / 1000,                 
-    Total_Export_Value = Total_Export_Value / 1000,   
+    Import_Value = Import_Value/1000 ,                 
+    Total_Export_Value = Total_Export_Value/1000,   
     Total_trade = (Import_Value + Total_Export_Value),    
   ) %>%
   pivot_longer(cols = c(Import_Value, Total_Export_Value, Total_trade), names_to = "Type", values_to = "Value")
@@ -164,7 +162,7 @@ p <- ggplot(combined_data, aes(x = Year, y = Value, group = Type, color = Type))
   scale_color_manual(values = c("Import_Value" = "blue", "Total_Export_Value" = "green", "Total_trade" = "orange")) +  
   labs(title = "TOTAL MERCHANDISE TRADE(2020-2024)",
        x = "", 
-       y = "Trade Value (in Billion SGD)") +  
+       y = "Trade Value ($S Bil)") +  
   theme_minimal() +  
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
         strip.text = element_text(size = 10, face = "bold"),
@@ -179,9 +177,12 @@ ggplotly(p)
 ```{r}
 #| ecoho: false
 
+
 annual_total <- combined_data %>%
+  mutate(Value = Value) %>%  # 確保轉換
   group_by(Year, Type) %>%
   summarise(TotalValue = sum(Value, na.rm = TRUE), .groups = "drop")
+
 
 p_annual <- ggplot(annual_total, aes(x = Year, y = TotalValue, group = Type, color = Type)) +
   geom_line(size = 1) +  
@@ -189,7 +190,7 @@ p_annual <- ggplot(annual_total, aes(x = Year, y = TotalValue, group = Type, col
   scale_color_manual(values = c("Import_Value" = "blue", "Total_Export_Value" = "green", "Total_trade" = "orange")) +  
   labs(title = "Total Merchandise Trade Value (2020-2024)",
        x = "Year", 
-       y = "Total Trade Value (in Billion SGD)") +  
+       y = "Total Trade Value ($S Bil)") +  
   theme_minimal() +  
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
         legend.position = "bottom")  
@@ -197,21 +198,20 @@ p_annual <- ggplot(annual_total, aes(x = Year, y = TotalValue, group = Type, col
 ggplotly(p_annual)
 
 ```
+
+
+
 :::
 
 ## Topic 2: MERCHANDISE TRADE PERFORMANCE WITH MAJOR TRADING PARTNERS, 2024
 
 ![MERCHANDISE TRADE PERFORMANCE WITH MAJOR TRADING PARTNERS, 2024](images/02-01.png)
 
-The advantages of the infographic:
+The infographic effectively utilizes different colors to label each country’s merchandise trade value, making it easy to interpret. The varying sizes of the circles visually illustrate the trade volume, allowing users to compare different countries at a glance. Additionally, the smart use of background colors helps differentiate between trade surplus and deficit, adding an important layer of insight to the data. 
+However, one key area for improvement is the lack of interactivity, which limits user engagement. 
+In the makeover, interactivity will be incorporated to enable users to explore the data dynamically, enhancing engagement and providing a more immersive analytical experience.
 
-1.  The chart effectively utilize different colors to label each country's merchandise trede value, making it clear to interpret
-2.  The varying sizes of the circles visually illustrate the trade volume, allowing users to compare between different countries.
-3.  The smart use of background color which differentiate trade surplus and deficit, providing an important layer of insight to the data.
-
-Areas for improvement of the infographic:
-
-1.  Lacking of interactivity.
+#### Makeover Plot
 
 ```{r}
 #| ecoho: false
@@ -286,11 +286,11 @@ ggplotly(p, tooltip = c("x", "y", "size", "fill"))
 
 ![MAJOR TRADING PARTNERS FOR TRADE IN SERVICES, 2023](images/03.png)
 
-The advantages of the infographic:
+The infographic clearly presents the ranking of different trade partners, making it easy to compare their positions. The inclusion of trade data from both 2023 and 2019 helps illustrate trends over time. However, the lack of context and the absence of total trade values for each country make it harder to grasp the overall trade volume.
 
-Areas for improvement of the infographic:
+The makeover plot will utilize a slope graph to more effectively highlight trade patterns over time and showcase how different trade partners have changed across the years with interativity.
 
-### Data Set for Topic 3
+#### Data Set for Topic 3
 
 ::: panel-tabset
 ### Import(services)
@@ -308,15 +308,15 @@ kable(head(export_s))
 ```
 :::
 
-### Create a top 10 trade partners list from 2023
+#### Create a top 10 trade partners list from 2023
 
 ```{r}
 
-# 讀取數據
+
 import_s <- read_excel("data/import_services.xlsx", sheet = "T1", skip = 10)
 export_s <- read_excel("data/exports_services.xlsx", sheet = "T1", skip = 10)
 
-# 轉換數據格式 (long format) 並過濾2023年數據
+
 import_long <- import_s %>%
   mutate(across(-`Data Series`, as.character)) %>%
   pivot_longer(cols = -`Data Series`, names_to = "Year", values_to = "Import_Value") %>%
@@ -331,27 +331,26 @@ export_long <- export_s %>%
          Export_Value = as.numeric(Export_Value)) %>%
   filter(Year == 2023 & !`Data Series` %in% c("Asia", "Europe", "North America", "Oceania", "South And Central America And The Caribbean"  ))
 
-# 合併 Import 和 Export 數據
+
 trade_2023 <- import_long %>%
   full_join(export_long, by = "Data Series") %>%
   mutate(
-    Import_Value = replace_na(Import_Value, 0),  # 若無數據則填補 0
+    Import_Value = replace_na(Import_Value, 0),  
     Export_Value = replace_na(Export_Value, 0),
-    Total_Trade = Import_Value + Export_Value   # 計算總貿易額
+    Total_Trade = Import_Value + Export_Value   
   )
 
-# 選出前十大貿易夥伴
+
 top_10_partners_2023 <- trade_2023 %>%
   arrange(desc(Total_Trade)) %>%
   slice_head(n = 10) %>%
   pull(`Data Series`)
 
-# 顯示前十名貿易夥伴
 print(top_10_partners_2023)
 
 ```
 
-### Plot slope graphs
+#### Plot slope graphs
 
 Next, we will use the list of the top 10 trading partners in 2023 to create a slope graph comparing 2019 and 2023. The graph will be interactive, allowing users to hover over a country to display a tooltip showing the total trade, import, and export values for that year. This presentation will be more concise and clearer than the original infographic.
 
@@ -385,9 +384,9 @@ trade_2023 <- import_long %>%
     Import_Value = round(sum(Import_Value, na.rm = TRUE) / 1000, 1),
     Export_Value = round(sum(Export_Value, na.rm = TRUE) / 1000, 1),
     Total_Trade = round(sum(Total_Trade, na.rm = TRUE) / 1000, 1), .groups = "drop"
-  ) %>%  # 單位轉換為Billion
+  ) %>%  
   ungroup() %>%
-  mutate(Year = factor(Year, levels = c(2019, 2023))) # 設定年份順序
+  mutate(Year = factor(Year, levels = c(2019, 2023))) 
 
 # Slope Graph
 trade_plot <- ggplot(trade_2023, aes(x = Year, y = Total_Trade, group = `Data Series`, text = paste(
@@ -401,7 +400,7 @@ trade_plot <- ggplot(trade_2023, aes(x = Year, y = Total_Trade, group = `Data Se
   scale_y_continuous(labels = scales::comma) +
   labs(
     title = "Top Trade Partners (2019 vs 2023)",
-    subtitle = "Comparison of Top Trade Countries in 2023 (in Billion SGD)",
+    subtitle = "Comparison of Top Trade Countries in 2023 ($S Bil)",
     caption = "Data Source: Imports and Exports of Services by Major Trading Partner",
     x = NULL, y = "Total Trade (Billion SGD)"
   ) +
@@ -414,6 +413,10 @@ trade_plotly
 
 
 ```
+
+From the interactive infographic, we can observe that the overall trend of trade partners has been increasing from 2019 to 2023. Obviously, the trade volume growth of the U.S. and EU-27 significantly outpaces that of other countries.
+
+However, in the original infographic, India is listed as the 10th largest trade partner. However, in the 2023 trade volume ranking calculated from our data, India is not included, while Ireland is. This highlights an inconsistency in the analysis result.
 
 If we use a static design for the slope graph, we would need three separate charts to compare total trade, export, and import between 2019 and 2023, as shown below.
 
@@ -455,7 +458,7 @@ trade_2023 <- import_long %>%
 # Slope Graph
 newggslopegraph(trade_2023, Year, Total_Trade, `Data Series`,
   Title = "Top Trade Partners (2019 vs 2023)",
-  SubTitle = "Comparison of Top Trade Countries in 2023 (in Billion SGD)",
+  SubTitle = "Comparison of Top Trade Countries in 2023 ($S Bil)",
   Caption = "Data Source: Imports and Exports of Services by Major Trading Partner") +
   theme_minimal()
 
@@ -493,8 +496,8 @@ import_summary <- import_long %>%
 
 # Import Slope Graph
 import_plot <- newggslopegraph(import_summary, Year, Total_Import, `Data Series`,
-  Title = "Top Importing Partners (2019 vs 2023)",
-  SubTitle = "Comparison of Top Trade Countries in 2023 (in Billion SGD)",
+  Title = "Top Importing Partners in Services (2019 vs 2023)",
+  SubTitle = "Comparison of Top Trade Countries in 2023 ($S Bil)",
   Caption = "Data Source: Imports of Services by Major Trading Partner") +
   theme_minimal()
 
@@ -509,7 +512,7 @@ export_summary <- export_long %>%
 # Export Slope Graph
 export_plot <- newggslopegraph(export_summary, Year, Total_Export, `Data Series`,
   Title = "Top Exporting Partners (2019 vs 2023)",
-  SubTitle = "Comparison of Top Trade Countries in 2023 (in Billion SGD)",
+  SubTitle = "Comparison of Top Trade Countries in 2023 ($S Bil)",
   Caption = "Data Source: Exports of Services by Major Trading Partner") +
   theme_minimal()
 
@@ -534,8 +537,9 @@ export_plot
 
 ## Part 2. Time-Series Analysis
 
-#### Data preprocession(Merchandise trade data)
+In this part, we will use the Merchandise trade data (including import, export, re-export) to perform time-series analysis.
 
+#### Data Preprocessing
 
 ```{r}
 import_m <- read_excel("data/trade.xlsx", sheet = "T1", range = "A11:JF171" )
@@ -543,21 +547,20 @@ export_m <- read_excel("data/trade.xlsx", sheet = "T2", range = "A11:JF171")
 re_export_m <- read_excel("data/trade.xlsx", sheet = "T3", range = "A11:JF171")
 ```
 
+To further analysis time series data, the first thing we need to do is to transform monthly import, export, and re-export data into a long format with a standardized "Month_Year" format,and merges them into a single dataset, fills missing values with zero, calculates total trade values, converts values from millions to billions, and ensures a continuous time series structure without gaps using a tsibble.
 
-Next, we transform, reshape, and merge import, export, and re-export trade data into a structured format with date-based indexing, ensuring completeness by filling missing values and calculating total trade values. Finally, generate a new data set "trade_data" for further time series analysis.
 ```{r}
 library(dplyr)
 library(tidyr)
 library(tsibble)
 library(lubridate)
 
-# 確保 Month_Year 格式是 "Jan 2025"
+# Transform the Month_Year to yearmonth()
 import_long <- import_m %>%
   pivot_longer(cols = -`Data Series`, names_to = "Month_Year", values_to = "Import_Value") %>%
-  mutate(Date = yearmonth(Month_Year)) %>%  # ✅ 轉換成 yearmonth()
+  mutate(Date = yearmonth(Month_Year)) %>%  
   select(`Data Series`, Date, Import_Value)
 
-# 同樣方式轉換 Export 和 Re-Export 數據
 export_long <- export_m %>%
   pivot_longer(cols = -`Data Series`, names_to = "Month_Year", values_to = "Export_Value") %>%
   mutate(Date = yearmonth(Month_Year)) %>%
@@ -568,7 +571,7 @@ re_export_long <- re_export_m %>%
   mutate(Date = yearmonth(Month_Year)) %>%
   select(`Data Series`, Date, Re_Export_Value)
 
-# 合併數據
+# Join 3 datasheet into one and convert the unit from million to billion
 trade_data <- import_long %>%
   full_join(export_long, by = c("Data Series", "Date")) %>%
   full_join(re_export_long, by = c("Data Series", "Date")) %>%
@@ -578,7 +581,7 @@ trade_data <- import_long %>%
     Re_Export_Value = replace_na(Re_Export_Value, 0),
     Total_Export_Value = Export_Value + Re_Export_Value,
     Total_Trade = Import_Value + Total_Export_Value,
-    # 轉換單位：從 Million 轉成 Billion
+    #  Million to Billion
     Import_Value = Import_Value / 1000,
     Export_Value = Export_Value / 1000,
     Re_Export_Value = Re_Export_Value / 1000,
@@ -586,102 +589,177 @@ trade_data <- import_long %>%
     Total_Trade = Total_Trade / 1000
   )
 
-# 轉換成 tsibble，確保時間序列不產生 gap
+# convert to tsibble 
 trade_ts <- trade_data %>%
   as_tsibble(index = Date, key = `Data Series`)
 
-# 檢查是否仍有 gap
+# check if there is time gap
 has_gaps(trade_ts)
 
 
 ```
+
+After the preparation above, we get a new dataset: "trade_ts" Now the Date format is "yearmonth", and the unit of trade value is in billion SGD.
+
 ```{r}
 head(trade_ts)
 ```
 
+#### Select top 10 trade countries from total trade volumn of 2023
+Next, We selects trade data for 2023, identifies the top 10 trading countries based on total trade value, filters the dataset for these countries, converts it into a time series tibble, and fills any missing time gaps.
 
-
-
-Visiualising time series data, select top 10 countries from total trade value of 2023.
 ```{r}
 
-# 選取 2023 年的數據，並找出前 10 大貿易國家
 top_10_countries_2023 <- trade_ts %>%
   filter(year(Date) == 2023, 
-         !(`Data Series` %in% c("Total All Markets", "America", "Asia", "Oceania"))) %>%  # 排除這些總類
-  distinct(`Data Series`, Date, .keep_all = TRUE) %>%  # 確保唯一性
+         !(`Data Series` %in% c("Total All Markets", "America", "Asia", "Oceania"))) %>% 
+  distinct(`Data Series`, Date, .keep_all = TRUE) %>%  
   group_by(`Data Series`) %>%
   summarise(Total_Trade_Sum = sum(Total_Trade, na.rm = TRUE)) %>%
   arrange(desc(Total_Trade_Sum)) %>%
   slice_head(n = 10) %>%
-  pull(`Data Series`)  # 取得前10大國家名稱
+  pull(`Data Series`)  
 
-
-# 定義前 10 大貿易國家
 top_10_countries_2023 <- c("China", "Europe", "United States", "Malaysia", "Taiwan", "Hong Kong", "Indonesia", "Korea, Rep Of", "Japan", "Thailand")
 
-# 過濾出這些國家的時間序列數據
 trade_top10 <- trade_ts %>%
   filter(`Data Series` %in% top_10_countries_2023) %>%
-  as_tsibble(index = Date, key = `Data Series`)  # 確保 tsibble 格式
+  as_tsibble(index = Date, key = `Data Series`)  
 
-# 確保數據沒有間隙
 trade_top10 <- trade_top10 %>%
   fill_gaps()
 
-# 訓練 ARIMA 模型
-trade_forecast <- trade_top10 %>%
-  model(ARIMA(Total_Trade)) %>%
-  forecast(h = "6 months")  # 預測未來 6 個月
-
-# 合併歷史數據和預測數據
-p_forecast <- autoplot(trade_forecast, trade_top10, level = 95) +
-  labs(title = "6-Month Forecast of Total Trade for Top 10 Trading Partners",
-       x = "Year",
-       y = "Total Trade Value") +
-  theme_minimal() +
-  scale_color_manual(values = c("black", "blue")) # 黑色代表歷史數據，紅色代表預測數據
-
-# 轉為互動式圖表
-ggplotly(p_forecast)
-
-
-
 ```
 
-
+The top 10 countries in 2023:
 
 ```{r}
 print(top_10_countries_2023)
 ```
 
+#### Perform time series data visualization for selected countries
+Next, we select six of the top country to visualize the time series data.
 
 ```{r}
 p <- trade_top10 %>%
-  filter(`Data Series` == "United States" |
-         `Data Series` == "China"|
-         `Data Series` == "Europe"|
-         `Data Series` == "Malaysia"|
-         `Data Series` == "Taiwan"|
-         `Data Series` == "Hong Kong") %>% 
-  autoplot(Total_Trade) + 
-  facet_grid(`Data Series` ~ ., scales = "free_y") +
-  labs(title = "Total Trade Trends in Billion SGD",
+  filter(`Data Series` %in% c("United States", "China", "Europe", "Malaysia", "Taiwan", "Hong Kong")) %>%
+  mutate(
+    Country = case_when(  
+      `Data Series` == "United States" ~ "USA",
+      `Data Series` == "China" ~ "CHN",
+      `Data Series` == "Europe" ~ "EU",
+      `Data Series` == "Malaysia" ~ "MAS",
+      `Data Series` == "Taiwan" ~ "TWN",
+      `Data Series` == "Hong Kong" ~ "HKG",
+      TRUE ~ `Data Series`
+    )
+  ) %>%
+  ggplot(aes(x = Date, y = Total_Trade, color = Country, 
+             text = paste("Country:", `Data Series`))) +  # In Tooltip show original data series name
+  geom_line() + 
+  facet_grid(Country ~ ., scales = "free_y", switch = "y") +  # Right bar show USA, CHN...
+  labs(title = "Total Trade Trends of Selected Countries",
        x = "Year",
-       y = "Total Trade Value (Billion SGD)") 
+       y = "Total Trade Value ($S Bil)") +
+  theme(
+    strip.text.y = element_text(size = 8, face = "bold"),  
+    panel.spacing = unit(1, "lines"),
+    legend.position = "none",  
+    axis.text.y = element_text(size = 5)  
+  )
+
+ggplotly(p, tooltip = c("x", "y", "text"))
+
+
+```
+
+Use "gg_season" to check if there is any seasonal pattern
+
+```{r}
+trade_top10 %>%
+  filter(`Data Series` %in% c("United States", "Europe", "China", "Malaysia")) %>%
+  gg_season(Total_Trade) +
+  labs(title = "Seasonal Pattern of Total Trade for Selected Countries", 
+       x = "Month",
+       y = "Total Trade Value ($S Bil)") +
+  theme(
+    strip.text.y = element_text(size = 7, face = "bold"),
+    plot.title = element_text(size = 11)
+    )
+
+```
+
+From the seasonal plot, we can observe several peak in certain months, such as March and July. Next, we use composite plot and STL decomposition to analyze the trade trends of China and the United States.
+
+### United States
+::: panel-tabset
+### Composite Plot
+
+```{r}
+trade_ts %>%
+  filter(`Data Series` == "United States") %>%
+  gg_tsdisplay(Total_Trade) +
+  ggtitle("Total Trade Trend with the United States($S Bil)")
+  
+
+```
+### STL
+```{r}
+p <- trade_ts %>%
+  filter(`Data Series` == "United States") %>%
+  model(stl = STL(Total_Trade)) %>%
+  components() %>%
+  autoplot() +
+  ggtitle("STL Decomposition of Total Trade with the United States($S Bil)") +
+  theme(
+    strip.text.y = element_text(size = 7, face = "bold"),
+    plot.title = element_text(size = 11)
+    )
 ggplotly(p)
 ```
+:::
+
+Insight: 
+
+From the composite plot of the United States, we can observe that the overall trend of total trade between Singapore and the United States is upward (particularly after 2020). 
+Nevertheless, there are fluctuations in the most recent years. The ACF plot shows strong autocorrelation at shorter lags, suggesting a persistent seasonal pattern or trend over time. 
+The seasonality suggests that, in general, there are peaks in specific months such as March, July, August, and November.
+
+In a similar pattern, the STL decomposition plot also suggests a long-term upward trend in trade volume. Moreover, there is a strong seasonal pattern with higher variation in recent years, indicating that specific months consistently experience higher or lower trade activity each year. 
+The remainder component captures non-systematic variations, most likely resulting from unexpected events or economic disruptions. The fluctuations appear more volatile in recent years.
+
+### China
+::: panel-tabset
+### Composite Plot
 ```{r}
 
 trade_ts %>%
-  filter(`Data Series` == "United States" ) %>%
-  gg_tsdisplay(Total_Trade)
+  filter(`Data Series` == "China") %>%
+  gg_tsdisplay(Total_Trade) +
+  ggtitle("Total Trade Trend with the China($S Bil)")
 ```
+### STL
 ```{r}
 
-trade_ts %>%
-  filter(`Data Series` == "China" ) %>%
-  gg_tsdisplay(Total_Trade)
+p <- trade_ts %>%
+  filter(`Data Series` == "China") %>%
+  model(stl = STL(Total_Trade)) %>%
+  components() %>%
+  autoplot() +
+  ggtitle("STL Decomposition of Total Trade with the China($S Bil)") +
+  theme(
+    strip.text.y = element_text(size = 7, face = "bold"),
+    plot.title = element_text(size = 11)
+    )
+ggplotly(p)
 ```
+```
+:::
+Insight:
+
+Similarly with the United Stated, The total trade volume between Singapore and China also exhibit a lon-term upward trend, particularly after 2020. Moreover, strong seasonality patterns are shown in both cases, with peaks in March, July, August, and November. The ACF plots indicate high autocorrelation. Besides, the remainder component in STL decomposition suggests that hte trade market has experienced volatility in recent years for both countries.
+
+The differences between the two countries can be observed: China shows a more gradual increase in trade volume, whereas the U.S. experiences more fluctuations. Besides, China's seasonality appears more consistent over time, whereas the U.S. shows a gradual increase in recent years.
+Moreover, the remainder component indicates that trade activity with the U.S. exhibits a stronger reaction to disruptive events.
 
 
