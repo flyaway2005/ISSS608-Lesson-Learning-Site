@@ -203,6 +203,10 @@ ggplotly(p_annual)
 
 :::
 
+The first plot of total merchandise trade in Singapore reveals a seasonal trend, with fluctuations in certain months. Trade volume typically declines in January and February, before surging to its highest point in March. This pattern suggests a seasonal impact on trade volume, possibly influenced by economic cycles or festive periods.
+
+The second plot illustrates the annual total trade value. From 2020 to 2022, both imports and exports experienced steady growth, followed by a slight dip in 2023. However, 2024 shows signs of recovery, indicating resilience in Singapore’s trade performance.
+
 ### Topic 2: MERCHANDISE TRADE PERFORMANCE WITH MAJOR TRADING PARTNERS, 2024
 
 ![MERCHANDISE TRADE PERFORMANCE WITH MAJOR TRADING PARTNERS, 2024](images/02-01.png)
@@ -245,9 +249,9 @@ trade_2024 <- import_2024 %>%
     Total_Export_Value = (Export_Value + Re_Export_Value), 
     Total_Trade = (Import_Value + Total_Export_Value)
   ) %>%
-  filter(!`Data Series` %in% c("Total All Markets", "Asia")) %>%
+  filter(!`Data Series` %in% c("Total All Markets", "Asia", "America", "Oceania")) %>%
   arrange(desc(Total_Trade)) %>%  
-  slice(1:12)
+  slice(1:10)
 
 
 max_value <- max(trade_2024$Total_Export_Value, trade_2024$Import_Value, na.rm = TRUE)
@@ -281,6 +285,8 @@ p <- ggplot(trade_2024, aes(x = Total_Export_Value, y = Import_Value, size = Tot
 ggplotly(p, tooltip = c("x", "y", "size", "fill"))
 
 ```
+In this makeover graphic, the dynamic tooltip provides an engaging interaction for users. We can observe that there are six key trade partners—the United States, Taiwan, South Korea, Japan, and the European Union—where Singapore experiences a trade deficit.
+On the other hand, China, Hong Kong, Indonesia, and Thailand are trade surplus partners, indicating that Singapore exports more to these countries than it imports. Meanwhile, Malaysia maintains a balanced trade relationship with Singapore, as its import and export values are nearly equal.
 
 ### Topic 3: MAJOR TRADING PARTNERS FOR TRADE IN SERVICES, 2023
 
