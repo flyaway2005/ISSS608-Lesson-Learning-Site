@@ -40,7 +40,7 @@ website:
         - text: "Take-home Exercise 2"
           href: "Takehome_Ex/Take-home_Ex2/take-home_Ex02.html"
         - text: "Take-home Exercise 3"
-          href: "Takehome_Ex/Take-home_Ex2/take-home_Ex03.html"
+          href: "Takehome_Ex/Take-home_Ex3/take-home_Ex03.html"
     right:
       - href: index.qmd
         text: "Home"

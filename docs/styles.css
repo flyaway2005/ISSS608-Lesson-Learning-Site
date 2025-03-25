@@ -1,0 +1,234 @@
+/* css styles */
+.custom-box {
+    border: 2px solid rgba(110, 63, 191, 0.2); /* 50% 透明度 */
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+/* 網站主題顏色 */
+:root {
+  --primary-color: #5ca5c3;      /* 更淺的主色調 */
+  --secondary-color: #7dcad8;    /* 更淺的次要色 */
+  --accent-color: #ffc857;       /* 更柔和的強調色 */
+  --text-color: #456268;         /* 更柔和的文字顏色 */
+  --background-color: #ffffff;
+  --nav-bg: #5ca5c3;            /* 導航欄使用更淺的顏色 */
+  --nav-text: #ffffff;
+  --link-color: #4191b1;        /* 更淺的連結顏色 */
+  --code-bg: #f8f9fa;
+  --border-color: #e9ecef;
+}
+
+/* 全域設定 */
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-color);
+  line-height: 1.6;
+  background-color: var(--background-color);
+}
+
+/* 導航欄樣式 */
+.navbar {
+  background-color: var(--nav-bg) !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand, .nav-link {
+  color: var(--nav-text) !important;
+}
+
+.navbar .dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.navbar .dropdown-item:hover {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+/* 標題樣式 */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 2.5em;
+  border-bottom: 3px solid var(--secondary-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 2em;
+  border-bottom: 2px solid var(--secondary-color);
+}
+
+/* 連結樣式 */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+/* 目錄樣式 */
+#TOC {
+  background-color: #f8f9fa;
+  border-right: 1px solid var(--border-color);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.toc-active {
+  color: var(--accent-color) !important;
+  font-weight: bold;
+}
+
+/* 程式碼區塊樣式 */
+pre, code {
+  background-color: var(--code-bg);
+  border-radius: 6px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.9em;
+}
+
+.code-tools-button {
+  background-color: var(--secondary-color) !important;
+  color: white !important;
+  border-radius: 4px;
+}
+
+/* 表格樣式 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+thead {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+/* 圖表容器 */
+.figure {
+  margin: 2em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 標籤頁樣式 */
+.nav-tabs {
+  border-bottom: 2px solid var(--secondary-color);
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  color: var(--text-color);
+  padding: 10px 20px;
+  border-radius: 8px 8px 0 0;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+/* 按鈕樣式 */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+  
+  h1 {
+    font-size: 2em;
+  }
+  
+  h2 {
+    font-size: 1.75em;
+  }
+  
+  .toc-content {
+    margin-left: 0;
+  }
+  
+  .navbar-collapse {
+    background-color: var(--nav-bg);
+  }
+}
+
+/* 卡片樣式 */
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* 頁腳樣式 */
+footer {
+  margin-top: 4em;
+  padding: 2em 0;
+  background-color: #f8f9fa;
+  border-top: 1px solid var(--border-color);
+}
+
+/* 列印優化 */
+@media print {
+  body {
+    font-size: 12pt;
+  }
+  
+  pre, code {
+    border: 1px solid #ddd;
+  }
+  
+  .no-print {
+    display: none;
+  }
+  
+  a[href]:after {
+    content: " (" attr(href) ")";
+  }
+}

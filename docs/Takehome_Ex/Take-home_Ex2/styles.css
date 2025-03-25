@@ -1,0 +1,159 @@
+/* 主要顏色變數 */
+:root {
+  --primary-color: #2c7bb6;
+  --secondary-color: #abd9e9;
+  --accent-color: #fdae61;
+  --text-color: #2c3e50;
+  --background-color: #ffffff;
+  --link-color: #2980b9;
+  --code-bg: #f8f9fa;
+}
+
+/* 整體頁面樣式 */
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-color);
+  line-height: 1.6;
+  background-color: var(--background-color);
+}
+
+/* 標題樣式 */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 2.5em;
+  border-bottom: 3px solid var(--secondary-color);
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 2em;
+  border-bottom: 2px solid var(--secondary-color);
+}
+
+/* 連結樣式 */
+a {
+  color: var(--link-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent-color);
+  text-decoration: underline;
+}
+
+/* 程式碼區塊樣式 */
+pre, code {
+  background-color: var(--code-bg);
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+}
+
+/* 表格樣式 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+th {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  font-weight: 600;
+  padding: 12px;
+  text-align: left;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+/* 目錄樣式 */
+#TOC {
+  background-color: #f8f9fa;
+  border-right: 1px solid #e1e1e1;
+  padding: 20px;
+}
+
+.toc-active {
+  color: var(--accent-color) !important;
+  font-weight: bold;
+}
+
+/* 圖表樣式 */
+.plot-container {
+  margin: 2em 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 互動元素樣式 */
+.panel-tabset {
+  margin: 2em 0;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.panel-tabset .nav-tabs {
+  background-color: var(--secondary-color);
+  border-bottom: none;
+}
+
+.panel-tabset .nav-link {
+  color: var(--text-color);
+  border: none;
+  padding: 12px 20px;
+}
+
+.panel-tabset .nav-link.active {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+  
+  h1 {
+    font-size: 2em;
+  }
+  
+  h2 {
+    font-size: 1.75em;
+  }
+  
+  .toc-content {
+    margin-left: 0;
+  }
+}
+
+/* 列印樣式 */
+@media print {
+  body {
+    font-size: 12pt;
+  }
+  
+  pre, code {
+    border: 1px solid #ddd;
+  }
+  
+  .no-print {
+    display: none;
+  }
+} 
